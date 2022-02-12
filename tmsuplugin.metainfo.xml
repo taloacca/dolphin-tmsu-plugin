@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component type="addon">
+  <id>tmsuplugin</id>
+  <extends>org.kde.dolphin.desktop</extends>
+  <name>TMSU Plugin</name>
+  <name xml:lang="en-GB">TMSU Plugin</name>
+  <icon type="stock">system-file-manager</icon>
+</component>

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Service
+Name=TMSU Plugin
+X-KDE-Library=tmsuplugin
+X-KDE-ServiceTypes=KFileItemAction/Plugin
+MimeType=application/octet-stream;
+Icon=tag

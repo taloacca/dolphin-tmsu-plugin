@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE kcfg SYSTEM "http://www.kde.org/standards/kcfg/1.0/kcfg.dtd">
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0">
+    <kcfgfile name="tmsupluginrc"/>
+    <group name="TMSUPluginSettings">
+        <entry name="DbPath" type="Path">
+            <label>Path to TMSU database</label>
+            <default>$HOME/.tmsu/</default>
+        </entry>
+        <entry name="MountPath" type="Path">
+            <label>Path to TMSU mount directory</label>
+            <default>$HOME/mp/</default>
+        </entry>
+    </group>
+</kcfg>
