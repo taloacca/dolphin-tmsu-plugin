@@ -84,8 +84,8 @@ void TMSUPlugin::editTags()
             }
         }
 
-        // TagDialog tagDialog(url.toLocalFile(), tags);
-        // tagDialog.exec();
+        TagDialog tagDialog(url.toLocalFile(), tags, tagSummaryList);
+        tagDialog.exec();
     }
 }
 #include "tmsuplugin.moc"

@@ -4,7 +4,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
-TagDialog::TagDialog(QString url, QList< QString > tags, QWidget* parent) :
+TagDialog::TagDialog(const QString &url, const QList< QString > &tags, const QList< QPair< QString, int > > &tagSummaryList, QWidget* parent) :
     QDialog(parent)
 {
     this->setWindowTitle(QStringLiteral("TMSU Tags"));
@@ -13,7 +13,7 @@ TagDialog::TagDialog(QString url, QList< QString > tags, QWidget* parent) :
     QVBoxLayout *mainLayout = new QVBoxLayout;
     this->setLayout(mainLayout);
     mainLayout->addWidget(mainWidget);
-    
+
     for(const auto &tag : tags)
     {
         QLabel *tagLabel = new QLabel(tag);
