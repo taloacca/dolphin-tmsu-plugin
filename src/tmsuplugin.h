@@ -22,4 +22,3 @@ private Q_SLOTS:
     void editTags();
 };
 #endif // TMSUPLUGIN_H
-
