@@ -5,6 +5,7 @@
 
 #include <QProcess>
 #include <QTextCodec>
+#include <QPair>
 
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
@@ -36,6 +37,35 @@ void TMSUPlugin::editTags()
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("TMSU_DB", settings->dbPath());
 
+    QList< QPair< QString, int > > tagSummaryList;
+    {
+        QProcess process;
+        process.setProcessEnvironment(env);
+        process.start("tmsu", {"info", "-u", "--color", "never"});
+        int lineIdx = 0;
+        while(process.waitForReadyRead())
+        {
+            char buffer[512];
+            while (process.readLine(buffer, sizeof(buffer)) > 0)
+            {
+                // Skip unnecessary output that isn't about tag usage
+                if(lineIdx < 4)
+                {
+                    lineIdx++;
+                    continue;
+                }
+
+                QString tagSummary = QTextCodec::codecForLocale()->toUnicode(buffer);
+                // Remove newline
+                tagSummary.chop(1);
+                int lastSpaceIdx = tagSummary.lastIndexOf(' ');
+                int tagCount = tagSummary.mid(lastSpaceIdx-1).toInt();
+                QString tagName = tagSummary.left(lastSpaceIdx).trimmed();
+                tagSummaryList += QPair< QString, int >(tagName, tagCount);
+            }
+        }
+    }
+
     for(const auto &url : urls)
     {
         QList< QString > tags;
@@ -54,8 +84,8 @@ void TMSUPlugin::editTags()
             }
         }
 
-        TagDialog tagDialog(url.toLocalFile(), tags);
-        tagDialog.exec();
+        // TagDialog tagDialog(url.toLocalFile(), tags);
+        // tagDialog.exec();
     }
 }
 #include "tmsuplugin.moc"

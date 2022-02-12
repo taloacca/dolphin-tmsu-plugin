@@ -14,9 +14,6 @@ TagDialog::TagDialog(QString url, QList< QString > tags, QWidget* parent) :
     this->setLayout(mainLayout);
     mainLayout->addWidget(mainWidget);
     
-    QLabel *urlLabel = new QLabel(url);
-    mainLayout->addWidget(urlLabel);
-
     for(const auto &tag : tags)
     {
         QLabel *tagLabel = new QLabel(tag);
