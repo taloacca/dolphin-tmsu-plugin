@@ -49,6 +49,7 @@ QList< QAction* > TMSUPlugin::actions(const KFileItemListProperties& fileItemInf
 
 QList< QString > TMSUPlugin::getTagsForFile(const QString &file)
 {
+    // TODO: this doesn't handle tag values correctly
     TMSUPluginSettings* settings = TMSUPluginSettings::self();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("TMSU_DB", settings->dbPath());
@@ -57,7 +58,7 @@ QList< QString > TMSUPlugin::getTagsForFile(const QString &file)
 
     QProcess process;
     process.setProcessEnvironment(env);
-    process.start("tmsu", {"tags", "-1", "-n", "never", file});
+    process.start("tmsu", {"tags", "-1", "--name", "never", file});
     while(process.waitForReadyRead())
     {
         char buffer[512];
@@ -74,6 +75,28 @@ QList< QString > TMSUPlugin::getTagsForFile(const QString &file)
     return tags;
 }
 
+void TMSUPlugin::setTagsForFile(const QString &file, const QList< QString > &tags)
+{
+    TMSUPluginSettings* settings = TMSUPluginSettings::self();
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("TMSU_DB", settings->dbPath());
+
+    QList< QString > escapedTags = tags;
+    for(auto &escapedTag : escapedTags)
+    {
+        escapedTag = escapedTag.replace(" ", "\\ ").replace("=", "\\=");
+    }
+
+    QString tagString = escapedTags.join(" ");
+
+    QProcess process;
+    process.setProcessEnvironment(env);
+    process.start("tmsu", {"untag", "--all", file});
+    process.waitForFinished();
+    process.start("tmsu", {"tag", file, "--tags", tagString});
+    process.waitForFinished();
+}
+
 void TMSUPlugin::editTags()
 {
     const QList< QUrl > urls = sender()->property("urls").value< QList< QUrl > >();
@@ -86,7 +109,7 @@ void TMSUPlugin::editTags()
     {
         QProcess process;
         process.setProcessEnvironment(env);
-        process.start("tmsu", {"info", "-u", "--color", "never"});
+        process.start("tmsu", {"info", "--usage", "--color", "never"});
         int lineIdx = 0;
         while(process.waitForReadyRead())
         {
@@ -130,6 +153,12 @@ void TMSUPlugin::copyTags()
 
 void TMSUPlugin::pasteTags()
 {
+    const QList< QUrl > urls = sender()->property("urls").value< QList< QUrl > >();
+
+    for(const auto &url : urls)
+    {
+        setTagsForFile(url.toLocalFile(), m_copiedTags);
+    }
 }
 
 #include "tmsuplugin.moc"

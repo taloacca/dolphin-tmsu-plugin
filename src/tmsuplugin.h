@@ -20,6 +20,7 @@ public:
 
 private:
     QList< QString > getTagsForFile(const QString &file);
+    void setTagsForFile(const QString &file, const QList< QString > &tags);
 
 private Q_SLOTS:
     void editTags();
