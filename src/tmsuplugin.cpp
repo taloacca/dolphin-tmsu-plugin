@@ -80,6 +80,7 @@ void TMSUPlugin::editTags()
                 QString tagName = QTextCodec::codecForLocale()->toUnicode(buffer);
                 // Remove newline
                 tagName.chop(1);
+                tagName.replace("\\ ", " ").replace("\\=", "=");
                 tags += tagName;
             }
         }
