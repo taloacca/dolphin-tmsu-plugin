@@ -18,7 +18,15 @@ public:
 
     QList< QAction* > actions(const KFileItemListProperties& fileItemInfos, QWidget* parentWidget) override;
 
+private:
+    QList< QString > getTagsForFile(const QString &file);
+
 private Q_SLOTS:
     void editTags();
+    void copyTags();
+    void pasteTags();
+
+private:
+    QList< QString > m_copiedTags;
 };
 #endif // TMSUPLUGIN_H
