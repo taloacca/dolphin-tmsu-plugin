@@ -5,6 +5,8 @@
 #include <KAbstractFileItemActionPlugin>
 #include <KFileItemListProperties>
 
+#include "tmsutag.h"
+
 #include <QAction>
 #include <QObject>
 #include <QVariant>
@@ -19,8 +21,8 @@ public:
     QList< QAction* > actions(const KFileItemListProperties& fileItemInfos, QWidget* parentWidget) override;
 
 private:
-    QList< QString > getTagsForFile(const QString &file);
-    void setTagsForFile(const QString &file, const QList< QString > &tags);
+    TMSUTagList getTagsForFile(const QString &file);
+    void setTagsForFile(const QString &file, const TMSUTagList &tags);
 
 private Q_SLOTS:
     void editTags();
@@ -28,6 +30,6 @@ private Q_SLOTS:
     void pasteTags();
 
 private:
-    QList< QString > m_copiedTags;
+    TMSUTagList m_copiedTags;
 };
 #endif // TMSUPLUGIN_H

@@ -3,6 +3,7 @@ kcoreaddons_desktop_to_json(tmsuplugin tmsuplugin.desktop)
 
 target_sources(tmsuplugin PRIVATE
     tmsuplugin.cpp
+    tmsutag.cpp
     tagdialog.cpp
 )
 

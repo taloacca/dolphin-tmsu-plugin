@@ -14,6 +14,7 @@ TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const Q
 {
     Q_UNUSED(metaData);
     Q_UNUSED(args);
+    TMSUTag tag(QStringLiteral("test"), QStringLiteral("value"));
 }
 
 QList< QAction* > TMSUPlugin::actions(const KFileItemListProperties& fileItemInfos, QWidget* parentWidget)
@@ -47,14 +48,13 @@ QList< QAction* > TMSUPlugin::actions(const KFileItemListProperties& fileItemInf
     return actions;
 }
 
-QList< QString > TMSUPlugin::getTagsForFile(const QString &file)
+TMSUTagList TMSUPlugin::getTagsForFile(const QString &file)
 {
-    // TODO: this doesn't handle tag values correctly
     TMSUPluginSettings* settings = TMSUPluginSettings::self();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("TMSU_DB", settings->dbPath());
 
-    QList< QString > tags;
+    TMSUTagList tags;
 
     QProcess process;
     process.setProcessEnvironment(env);
@@ -67,24 +67,23 @@ QList< QString > TMSUPlugin::getTagsForFile(const QString &file)
             QString tagName = QTextCodec::codecForLocale()->toUnicode(buffer);
             // Remove newline
             tagName.chop(1);
-            tagName.replace("\\ ", " ").replace("\\=", "=");
-            tags += tagName;
+            tags += TMSUTag::fromEscapedString(tagName);
         }
     }
 
     return tags;
 }
 
-void TMSUPlugin::setTagsForFile(const QString &file, const QList< QString > &tags)
+void TMSUPlugin::setTagsForFile(const QString &file, const TMSUTagList &tags)
 {
     TMSUPluginSettings* settings = TMSUPluginSettings::self();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("TMSU_DB", settings->dbPath());
 
-    QList< QString > escapedTags = tags;
-    for(auto &escapedTag : escapedTags)
+    QList< QString > escapedTags;
+    for(auto &tag : tags)
     {
-        escapedTag = escapedTag.replace(" ", "\\ ").replace("=", "\\=");
+        escapedTags.append(tag.toEscapedString());
     }
 
     QString tagString = escapedTags.join(" ");
@@ -99,6 +98,7 @@ void TMSUPlugin::setTagsForFile(const QString &file, const QList< QString > &tag
 
 void TMSUPlugin::editTags()
 {
+    // TODO: this doesn't handle multiple files at once nicely.  It should let you set common tags across those files
     const QList< QUrl > urls = sender()->property("urls").value< QList< QUrl > >();
 
     TMSUPluginSettings* settings = TMSUPluginSettings::self();
@@ -136,7 +136,7 @@ void TMSUPlugin::editTags()
 
     for(const auto &url : urls)
     {
-        QList< QString > tags = getTagsForFile(url.toLocalFile());
+        TMSUTagList tags = getTagsForFile(url.toLocalFile());
 
         TagDialog tagDialog(url.toLocalFile(), tags, tagSummaryList);
         tagDialog.exec();
