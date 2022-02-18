@@ -12,6 +12,7 @@ public:
     static bool tagUsageComparator(const TagUsage &t1, const TagUsage &t2);
 
     QString getName() const { return m_name; }
+    int getCount() const { return m_count; }
 
 private:
     QString m_name;
