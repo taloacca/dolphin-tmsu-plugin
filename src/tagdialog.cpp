@@ -1,4 +1,5 @@
 #include "tagdialog.h"
+#include "tagusagelistmodel.h"
 
 #include <QString>
 #include <QVBoxLayout>
@@ -24,16 +25,17 @@ TagDialog::TagDialog(const QMap< QString, QList< TMSUTag > > &fileTagMap, const 
     //     tagList.append(it->first);
     // }
 
+    TagUsageListModel *model = new TagUsageListModel(tagUsageList);
 
-    // QCompleter *completer = new QCompleter(tagList);
-    // completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
-    // completer->setCompletionMode(QCompleter::PopupCompletion);
+    QCompleter *completer = new QCompleter(model);
+    completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
     // completer->setFilterMode(Qt::MatchContains);
 
     QLineEdit *newTagName = new QLineEdit();
     newTagName->setMinimumWidth(150);
     newTagName->setClearButtonEnabled(true);
-    // newTagName->setCompleter(completer);
+    newTagName->setCompleter(completer);
     mainLayout->addWidget(newTagName);
 
     for(auto it = fileTagMap.keyValueBegin(); it != fileTagMap.keyValueEnd(); ++it)

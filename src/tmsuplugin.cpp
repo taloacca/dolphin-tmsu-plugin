@@ -9,8 +9,6 @@
 #include <QPair>
 #include <QMap>
 
-#include <algorithm>
-
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
 TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const QVariantList &args) :
@@ -145,7 +143,6 @@ void TMSUPlugin::editTags()
         fileTagMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
     }
 
-    std::sort(tagUsageList.begin(), tagUsageList.end(), TagUsage::tagUsageComparator);
     TagDialog tagDialog(fileTagMap, tagUsageList);
     tagDialog.exec();
 }
