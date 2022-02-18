@@ -19,18 +19,12 @@ TagDialog::TagDialog(const QMap< QString, QList< TMSUTag > > &fileTagMap, const 
 
     // TODO: need to decide how to handle multiple sets of tags on multiple files.  Show common tags only?
 
-    // QList< QString > tagList;
-    // for(auto it = tagInfoMap.keyValueBegin(); it != tagInfoMap.keyValueEnd(); ++it)
-    // {
-    //     tagList.append(it->first);
-    // }
-
     TagUsageListModel *model = new TagUsageListModel(tagUsageList);
 
     QCompleter *completer = new QCompleter(model);
-    completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+    completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     completer->setCompletionMode(QCompleter::PopupCompletion);
-    // completer->setFilterMode(Qt::MatchContains);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
 
     QLineEdit *newTagName = new QLineEdit();
     newTagName->setMinimumWidth(150);
