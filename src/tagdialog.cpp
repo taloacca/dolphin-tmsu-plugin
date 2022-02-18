@@ -4,7 +4,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
-TagDialog::TagDialog(const QString &url, const TMSUTagList &tags, const QList< QPair< QString, int > > &tagSummaryList, QWidget* parent) :
+TagDialog::TagDialog(const QMap< QString, QList< TMSUTag > > &fileTagMap, const QMap< QString, int > &tagInfoMap, QWidget* parent) :
     QDialog(parent)
 {
     this->setWindowTitle(QStringLiteral("TMSU Tags"));
@@ -14,15 +14,21 @@ TagDialog::TagDialog(const QString &url, const TMSUTagList &tags, const QList< Q
     this->setLayout(mainLayout);
     mainLayout->addWidget(mainWidget);
 
-    for(const auto &tag : tags)
+    for(auto it = fileTagMap.keyValueBegin(); it != fileTagMap.keyValueEnd(); ++it)
     {
-        QLabel *nameLabel = new QLabel(QStringLiteral("Tag: ") + tag.getName());
-        mainLayout->addWidget(nameLabel);
+        QLabel *fileLabel = new QLabel(QStringLiteral("Tags for file ") + it->first);
+        mainLayout->addWidget(fileLabel);
 
-        if(tag.hasValue())
+        for(const auto &tag : it->second)
         {
-            QLabel *valueLabel = new QLabel(QStringLiteral("Value: ") + tag.getValue());
-            mainLayout->addWidget(valueLabel);
+            QLabel *nameLabel = new QLabel(QStringLiteral("Tag: ") + tag.getName());
+            mainLayout->addWidget(nameLabel);
+
+            if(tag.hasValue())
+            {
+                QLabel *valueLabel = new QLabel(QStringLiteral("Value: ") + tag.getValue());
+                mainLayout->addWidget(valueLabel);
+            }
         }
     }
 }

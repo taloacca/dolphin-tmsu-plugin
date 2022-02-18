@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QTextCodec>
 #include <QPair>
+#include <QMap>
 
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
@@ -98,14 +99,14 @@ void TMSUPlugin::setTagsForFile(const QString &file, const TMSUTagList &tags)
 
 void TMSUPlugin::editTags()
 {
-    // TODO: this doesn't handle multiple files at once nicely.  It should let you set common tags across those files
     const QList< QUrl > urls = sender()->property("urls").value< QList< QUrl > >();
 
     TMSUPluginSettings* settings = TMSUPluginSettings::self();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("TMSU_DB", settings->dbPath());
 
-    QList< QPair< QString, int > > tagSummaryList;
+    QMap< QString, int > allTagInfoMap;
+    QMap< QString, QList< TMSUTag > > fileTagMap;
     {
         QProcess process;
         process.setProcessEnvironment(env);
@@ -128,19 +129,20 @@ void TMSUPlugin::editTags()
                 tagSummary.chop(1);
                 int lastSpaceIdx = tagSummary.lastIndexOf(' ');
                 int tagCount = tagSummary.mid(lastSpaceIdx-1).toInt();
+
+                // TODO: this won't work if a tag has leading or trailing whitespace, but it needs to be trimmed since the TMSU command adds whitespace for formatting
                 QString tagName = tagSummary.left(lastSpaceIdx).trimmed();
-                tagSummaryList += QPair< QString, int >(tagName, tagCount);
+                allTagInfoMap[tagName] = tagCount;
             }
         }
     }
 
     for(const auto &url : urls)
     {
-        TMSUTagList tags = getTagsForFile(url.toLocalFile());
-
-        TagDialog tagDialog(url.toLocalFile(), tags, tagSummaryList);
-        tagDialog.exec();
+        fileTagMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
     }
+    TagDialog tagDialog(fileTagMap, allTagInfoMap);
+    tagDialog.exec();
 }
 
 void TMSUPlugin::copyTags()
