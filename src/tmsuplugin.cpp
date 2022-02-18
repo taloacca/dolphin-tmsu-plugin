@@ -2,11 +2,14 @@
 #include "tmsupluginsettings.h"
 
 #include "tagdialog.h"
+#include "tagusage.h"
 
 #include <QProcess>
 #include <QTextCodec>
 #include <QPair>
 #include <QMap>
+
+#include <algorithm>
 
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
@@ -105,8 +108,8 @@ void TMSUPlugin::editTags()
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("TMSU_DB", settings->dbPath());
 
-    QMap< QString, int > allTagInfoMap;
     QMap< QString, QList< TMSUTag > > fileTagMap;
+    TagUsageList tagUsageList;
     {
         QProcess process;
         process.setProcessEnvironment(env);
@@ -132,7 +135,7 @@ void TMSUPlugin::editTags()
 
                 // TODO: this won't work if a tag has leading or trailing whitespace, but it needs to be trimmed since the TMSU command adds whitespace for formatting
                 QString tagName = tagSummary.left(lastSpaceIdx).trimmed();
-                allTagInfoMap[tagName] = tagCount;
+                tagUsageList.append(TagUsage(tagName, tagCount));
             }
         }
     }
@@ -141,7 +144,9 @@ void TMSUPlugin::editTags()
     {
         fileTagMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
     }
-    TagDialog tagDialog(fileTagMap, allTagInfoMap);
+
+    std::sort(tagUsageList.begin(), tagUsageList.end(), TagUsage::tagUsageComparator);
+    TagDialog tagDialog(fileTagMap, tagUsageList);
     tagDialog.exec();
 }
 

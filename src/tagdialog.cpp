@@ -6,7 +6,7 @@
 #include <QLineEdit>
 #include <QCompleter>
 
-TagDialog::TagDialog(const QMap< QString, QList< TMSUTag > > &fileTagMap, const QMap< QString, int > &tagInfoMap, QWidget* parent) :
+TagDialog::TagDialog(const QMap< QString, QList< TMSUTag > > &fileTagMap, const TagUsageList &tagUsageList, QWidget* parent) :
     QDialog(parent)
 {
     this->setWindowTitle(QStringLiteral("TMSU Tags"));
@@ -18,22 +18,22 @@ TagDialog::TagDialog(const QMap< QString, QList< TMSUTag > > &fileTagMap, const 
 
     // TODO: need to decide how to handle multiple sets of tags on multiple files.  Show common tags only?
 
-    QList< QString > tagList;
-    for(auto it = tagInfoMap.keyValueBegin(); it != tagInfoMap.keyValueEnd(); ++it)
-    {
-        tagList.append(it->first);
-    }
+    // QList< QString > tagList;
+    // for(auto it = tagInfoMap.keyValueBegin(); it != tagInfoMap.keyValueEnd(); ++it)
+    // {
+    //     tagList.append(it->first);
+    // }
 
 
-    QCompleter *completer = new QCompleter(tagList);
-    completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
-    completer->setCompletionMode(QCompleter::PopupCompletion);
+    // QCompleter *completer = new QCompleter(tagList);
+    // completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+    // completer->setCompletionMode(QCompleter::PopupCompletion);
     // completer->setFilterMode(Qt::MatchContains);
 
     QLineEdit *newTagName = new QLineEdit();
     newTagName->setMinimumWidth(150);
     newTagName->setClearButtonEnabled(true);
-    newTagName->setCompleter(completer);
+    // newTagName->setCompleter(completer);
     mainLayout->addWidget(newTagName);
 
     for(auto it = fileTagMap.keyValueBegin(); it != fileTagMap.keyValueEnd(); ++it)
