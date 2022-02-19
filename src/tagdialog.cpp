@@ -4,11 +4,10 @@
 #include <QString>
 #include <QVBoxLayout>
 #include <QLabel>
-#include <QLineEdit>
 #include <QCompleter>
 
-TagDialog::TagDialog(const QMap< QString, QList< TMSUTag > > &fileTagMap, const TagUsageList &tagUsageList, QWidget* parent) :
-    QDialog(parent)
+TagDialog::TagDialog(const FileTagListMap &fileTagListMap, const TagUsageList &tagUsageList, QWidget* parent) :
+    QDialog(parent), m_fileTagListMap(fileTagListMap)
 {
     this->setWindowTitle(QStringLiteral("TMSU Tags"));
 
@@ -22,17 +21,20 @@ TagDialog::TagDialog(const QMap< QString, QList< TMSUTag > > &fileTagMap, const 
     TagUsageListModel *model = new TagUsageListModel(tagUsageList);
 
     QCompleter *completer = new QCompleter(model);
+    // Is the model really considered sorted?
     completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     completer->setCompletionMode(QCompleter::PopupCompletion);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
 
-    QLineEdit *newTagName = new QLineEdit();
-    newTagName->setMinimumWidth(150);
-    newTagName->setClearButtonEnabled(true);
-    newTagName->setCompleter(completer);
-    mainLayout->addWidget(newTagName);
+    m_newTagName = new QLineEdit();
+    m_newTagName->setMinimumWidth(150);
+    m_newTagName->setClearButtonEnabled(true);
+    m_newTagName->setCompleter(completer);
+    mainLayout->addWidget(m_newTagName);
 
-    for(auto it = fileTagMap.keyValueBegin(); it != fileTagMap.keyValueEnd(); ++it)
+    connect(m_newTagName, &QLineEdit::editingFinished, this, &TagDialog::confirmTag);
+
+    for(auto it = fileTagListMap.keyValueBegin(); it != fileTagListMap.keyValueEnd(); ++it)
     {
         QLabel *fileLabel = new QLabel(QStringLiteral("Tags for file ") + it->first);
         mainLayout->addWidget(fileLabel);
@@ -49,4 +51,8 @@ TagDialog::TagDialog(const QMap< QString, QList< TMSUTag > > &fileTagMap, const 
             }
         }
     }
+}
+
+void TagDialog::confirmTag()
+{
 }

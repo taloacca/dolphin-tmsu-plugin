@@ -106,7 +106,7 @@ void TMSUPlugin::editTags()
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("TMSU_DB", settings->dbPath());
 
-    QMap< QString, QList< TMSUTag > > fileTagMap;
+    FileTagListMap fileTagListMap;
     TagUsageList tagUsageList;
     {
         QProcess process;
@@ -140,10 +140,10 @@ void TMSUPlugin::editTags()
 
     for(const auto &url : urls)
     {
-        fileTagMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
+        fileTagListMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
     }
 
-    TagDialog tagDialog(fileTagMap, tagUsageList);
+    TagDialog tagDialog(fileTagListMap, tagUsageList);
     tagDialog.exec();
 }
 
