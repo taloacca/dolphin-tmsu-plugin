@@ -23,7 +23,6 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     m_mainLayout = new QVBoxLayout(this);
 
     // TODO: need to decide how to handle multiple sets of tags on multiple files.  Show common tags only?
-    // TODO: handle setting a value on a tag
 
     m_listModel = new TagUsageListModel(tagUsageList, this);
 
@@ -81,7 +80,7 @@ void TagDialog::confirmTag()
     if(newTagName.isEmpty())
         return;
 
-    TMSUTag newTag(newTagName);
+    TMSUTag newTag = TMSUTag::fromEscapedString(newTagName);
 
     bool isTagNew = false;
     for(auto it = m_fileTagSetMap.keyValueBegin(); it != m_fileTagSetMap.keyValueEnd(); ++it)
