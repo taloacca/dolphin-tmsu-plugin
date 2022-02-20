@@ -54,6 +54,7 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     connect(m_addButton, &QPushButton::clicked, this, &TagDialog::confirmTag);
     m_editLineLayout->addWidget(m_addButton);
 
+    // TODO: Fix min size of flowlayout.  maybe also max size with scrollbar?
     m_tagLayout = new FlowLayout();
     m_mainLayout->addLayout(m_tagLayout);
     for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
