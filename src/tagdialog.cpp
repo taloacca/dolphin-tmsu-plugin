@@ -26,25 +26,25 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     }
     this->setWindowTitle(QStringLiteral("Edit TMSU tags for ") + titleFilename);
 
-    // TODO: when to pass 'this' as parent?
-    QWidget *mainWidget = new QWidget(this);
-    QVBoxLayout *mainLayout = new QVBoxLayout;
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
     this->setLayout(mainLayout);
-    mainLayout->addWidget(mainWidget);
 
     // TODO: need to decide how to handle multiple sets of tags on multiple files.  Show common tags only?
 
-    TagUsageListModel *model = new TagUsageListModel(tagUsageList);
+    TagUsageListModel *model = new TagUsageListModel(tagUsageList, this);
 
-    QCompleter *completer = new QCompleter(model);
+    QCompleter *completer = new QCompleter(model, this);
     // TODO: Is the model really considered sorted?
     completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     completer->setCompletionMode(QCompleter::PopupCompletion);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
 
+    // TODO: hook up TagWidget delete buttons
+    // TODO: add ok/cancel buttons on this dialog
+
     TagValidator *validator = new TagValidator(this);
 
-    m_newTagName = new QLineEdit();
+    m_newTagName = new QLineEdit(this);
     m_newTagName->setMinimumWidth(400);
     m_newTagName->setClearButtonEnabled(true);
     m_newTagName->setCompleter(completer);
@@ -53,6 +53,7 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
 
     connect(m_newTagName, &QLineEdit::returnPressed, this, &TagDialog::confirmTag);
 
+    // TODO: this messes things up if 'this' is FlowLayout parent
     m_tagLayout = new FlowLayout;
     mainLayout->addLayout(m_tagLayout);
     for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
@@ -69,6 +70,9 @@ void TagDialog::confirmTag()
 {
     QString newTagName = m_newTagName->text();
     m_newTagName->clear();
+    if(newTagName.isEmpty())
+        return;
+
     TMSUTag newTag(newTagName);
 
     bool isTagNew = false;

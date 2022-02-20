@@ -145,6 +145,7 @@ void TMSUPlugin::editTags()
 
     TagDialog tagDialog(fileTagSetMap, tagUsageList);
     tagDialog.exec();
+    // TODO: once tagDialog is done, check for Accepted state, update tag set differences
 }
 
 void TMSUPlugin::copyTags()
