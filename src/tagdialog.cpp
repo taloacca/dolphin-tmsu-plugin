@@ -69,9 +69,6 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     dummyButton->setVisible(false);
 
     m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    // TODO: I'm not sure why I can't set this shortcut to CTRL+Enter.  If I do, it just focuses the button, but doesn't trigger it...
-    QPushButton *okButton = m_buttonBox->button(QDialogButtonBox::Ok);
-    okButton->setShortcut(Qt::CTRL | Qt::Key_Space);
     this->connect(m_buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     this->connect(m_buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
     m_buttonBox->setCenterButtons(true);
