@@ -4,7 +4,6 @@
 #include <QString>
 #include <QFileInfo>
 #include <QLabel>
-#include <QPushButton>
 
 TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tagUsageList, QWidget* parent) :
     QDialog(parent), m_fileTagSetMap(fileTagSetMap)
@@ -21,33 +20,40 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     }
     setWindowTitle(QStringLiteral("Edit TMSU tags for ") + titleFilename);
 
-    m_layout = new QVBoxLayout(this);
-    setLayout(m_layout);
+    m_mainLayout = new QVBoxLayout(this);
+    setLayout(m_mainLayout);
 
     // TODO: need to decide how to handle multiple sets of tags on multiple files.  Show common tags only?
 
     m_listModel = new TagUsageListModel(tagUsageList, this);
 
     m_completer = new QCompleter(m_listModel, this);
-    // TODO: Is the model really considered sorted?
     m_completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     m_completer->setCompletionMode(QCompleter::PopupCompletion);
     m_completer->setCaseSensitivity(Qt::CaseInsensitive);
 
     m_validator = new TagValidator(this);
 
+    m_editLineLayout = new QHBoxLayout(this);
+    m_mainLayout->addLayout(m_editLineLayout);
+
     m_newTagName = new QLineEdit(this);
     m_newTagName->setMinimumWidth(400);
     m_newTagName->setClearButtonEnabled(true);
     m_newTagName->setCompleter(m_completer);
     m_newTagName->setValidator(m_validator);
-    m_layout->addWidget(m_newTagName);
-
     connect(m_newTagName, &QLineEdit::returnPressed, this, &TagDialog::confirmTag);
+    m_editLineLayout->addWidget(m_newTagName);
+
+    m_addButton = new QPushButton(QIcon::fromTheme(QStringLiteral("list-add")), "", this);
+    m_addButton->setAutoDefault(true);
+    m_addButton->setDefault(true);
+    connect(m_addButton, &QPushButton::clicked, this, &TagDialog::confirmTag);
+    m_editLineLayout->addWidget(m_addButton);
 
     // TODO: this messes things up if 'this' is FlowLayout parent
     m_tagLayout = new FlowLayout;
-    m_layout->addLayout(m_tagLayout);
+    m_mainLayout->addLayout(m_tagLayout);
     for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
     {
         for(const auto &tag : it->second)
@@ -56,21 +62,11 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
         }
     }
 
-    // TODO: add + button next to qlineedit.  It's more clear, and also wouldn't need this dummybutton any more
-    // This dummy button is here just to work around some odd behavior in QDialogButtonBox...
-    // If no button is set as 'default', then the QDialogButtonBox always makes its first button with the 'accept' role the default, even if
-    // you set default/autoDefault to false on it, which then triggers when the return key is pressed (instead of just creating a new tag).
-    // So instead, we make this dummy button the default and hide it to prevent this from happening.
-    QPushButton *dummyButton = new QPushButton("Dummy Button", this);
-    dummyButton->setAutoDefault(true);
-    dummyButton->setDefault(true);
-    dummyButton->setVisible(false);
-
     m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     connect(m_buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(m_buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
     m_buttonBox->setCenterButtons(true);
-    m_layout->addWidget(m_buttonBox);
+    m_mainLayout->addWidget(m_buttonBox);
 }
 
 void TagDialog::confirmTag()
@@ -112,7 +108,7 @@ void TagDialog::removeTag()
         }
 
         m_tagLayout->removeWidget(tagWidget);
-        delete tagWidget;
+        tagWidget->deleteLater();
     }
 }
 

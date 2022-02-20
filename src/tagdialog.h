@@ -9,10 +9,12 @@
 
 #include <QDialog>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QCompleter>
 #include <QDialogButtonBox>
 #include <QMap>
 #include <QLineEdit>
+#include <QPushButton>
 
 typedef QMap< QString, QSet< TMSUTag > > FileTagSetMap;
 
@@ -32,12 +34,15 @@ private:
 
     FileTagSetMap m_fileTagSetMap;
 
-    QVBoxLayout *m_layout;
-    QDialogButtonBox *m_buttonBox;
-    FlowLayout *m_tagLayout;
+    QVBoxLayout *m_mainLayout;
+    QHBoxLayout *m_editLineLayout;
+
     QLineEdit *m_newTagName;
+    QPushButton *m_addButton;
+    FlowLayout *m_tagLayout;
     TagValidator *m_validator;
     QCompleter *m_completer;
     TagUsageListModel *m_listModel;
+    QDialogButtonBox *m_buttonBox;
 };
 #endif // TAGDIALOG_H
