@@ -7,6 +7,8 @@ target_sources(tmsuplugin PRIVATE
     tagdialog.cpp
     tagusage.cpp
     tagusagelistmodel.cpp
+    tagwidget.cpp
+    flowlayout.cpp
 )
 
 kconfig_add_kcfg_files(tmsuplugin
