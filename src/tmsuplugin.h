@@ -22,7 +22,8 @@ public:
 
 private:
     TMSUTagSet getTagsForFile(const QString &file);
-    void setTagsForFile(const QString &file, const TMSUTagSet &tags);
+    void setNewTagsForFile(const QString &file, const TMSUTagSet &newTags);
+    void applyTagsForFile(const QString &file, const TMSUTagSet &tags, const bool adding);
 
 private Q_SLOTS:
     void editTags();

@@ -24,6 +24,8 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     setLayout(m_mainLayout);
 
     // TODO: need to decide how to handle multiple sets of tags on multiple files.  Show common tags only?
+    // TODO: qt warning about QLayout: Attempting to add QLayout "" to TagDialog "", which already has a layout
+    // TODO: handle setting a value on a tag
 
     m_listModel = new TagUsageListModel(tagUsageList, this);
 

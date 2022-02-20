@@ -8,6 +8,7 @@
 #include <QTextCodec>
 #include <QPair>
 #include <QMap>
+#include <QDebug>
 
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
@@ -76,8 +77,22 @@ TMSUTagSet TMSUPlugin::getTagsForFile(const QString &file)
     return tags;
 }
 
-void TMSUPlugin::setTagsForFile(const QString &file, const TMSUTagSet &tags)
+void TMSUPlugin::setNewTagsForFile(const QString &file, const TMSUTagSet &newTags)
 {
+    TMSUTagSet oldTags = getTagsForFile(file);
+
+    TMSUTagSet tagsToRemove = oldTags - newTags;
+    TMSUTagSet tagsToAdd = newTags - oldTags;
+
+    if(!tagsToRemove.isEmpty())
+        applyTagsForFile(file, tagsToRemove, false);
+    if(!tagsToAdd.isEmpty())
+        applyTagsForFile(file, tagsToAdd, true);
+}
+
+void TMSUPlugin::applyTagsForFile(const QString &file, const TMSUTagSet &tags, const bool adding)
+{
+    QString subcommand = adding ? "tag" : "untag";
     TMSUPluginSettings* settings = TMSUPluginSettings::self();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("TMSU_DB", settings->dbPath());
@@ -90,11 +105,11 @@ void TMSUPlugin::setTagsForFile(const QString &file, const TMSUTagSet &tags)
 
     QString tagString = escapedTags.join(" ");
 
+    // TODO: really should be checking return values
     QProcess process;
     process.setProcessEnvironment(env);
-    process.start("tmsu", {"untag", "--all", file});
-    process.waitForFinished();
-    process.start("tmsu", {"tag", file, "--tags", tagString});
+    process.start("tmsu", {subcommand, file, "--tags", tagString});
+    qDebug() << "tmsu " << subcommand << " " << file << " " << "--tags" << " " << tagString;
     process.waitForFinished();
 }
 
@@ -146,9 +161,12 @@ void TMSUPlugin::editTags()
     TagDialog tagDialog(fileTagSetMap, tagUsageList);
     if(tagDialog.exec() == QDialog::Accepted)
     {
-        qDebug() << "Accepted!";
+        FileTagSetMap newFileTagSetMap = tagDialog.getFileTagSetMap();
+        for(auto it = newFileTagSetMap.keyValueBegin(); it != newFileTagSetMap.keyValueEnd(); ++it)
+        {
+            setNewTagsForFile(it->first, it->second);
+        }
     }
-    // TODO: once tagDialog is done, check for Accepted state, update tag set differences
 }
 
 void TMSUPlugin::copyTags()
@@ -165,7 +183,7 @@ void TMSUPlugin::pasteTags()
 
     for(const auto &url : urls)
     {
-        setTagsForFile(url.toLocalFile(), m_copiedTags);
+        setNewTagsForFile(url.toLocalFile(), m_copiedTags);
     }
 }
 
