@@ -44,3 +44,15 @@ QString TMSUTag::toEscapedString() const
     }
     return ret;
 }
+
+// Tags are unique based on name, so the value isn't used in these functions.
+// If tag with a value is being added, the tag name needs to be checked first.
+bool TMSUTag::operator==(const TMSUTag &other) const
+{
+    return getName() == other.getName();
+}
+
+uint qHash(const TMSUTag &c) noexcept
+{
+    return qHash(c.getName());
+}

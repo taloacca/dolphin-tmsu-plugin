@@ -11,21 +11,22 @@
 #include <QCompleter>
 #include <QPushButton>
 
-TagDialog::TagDialog(const FileTagListMap &fileTagListMap, const TagUsageList &tagUsageList, QWidget* parent) :
-    QDialog(parent), m_fileTagListMap(fileTagListMap)
+TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tagUsageList, QWidget* parent) :
+    QDialog(parent), m_fileTagSetMap(fileTagSetMap)
 {
     QString titleFilename;
-    if(fileTagListMap.size() > 1)
+    if(fileTagSetMap.size() > 1)
     {
         titleFilename = "multiple files";
     }
     else
     {
-        QFileInfo info(fileTagListMap.keyValueBegin()->first);
+        QFileInfo info(fileTagSetMap.keyValueBegin()->first);
         titleFilename = info.fileName();
     }
     this->setWindowTitle(QStringLiteral("Edit TMSU tags for ") + titleFilename);
 
+    // TODO: when to pass 'this' as parent?
     QWidget *mainWidget = new QWidget(this);
     QVBoxLayout *mainLayout = new QVBoxLayout;
     this->setLayout(mainLayout);
@@ -36,7 +37,7 @@ TagDialog::TagDialog(const FileTagListMap &fileTagListMap, const TagUsageList &t
     TagUsageListModel *model = new TagUsageListModel(tagUsageList);
 
     QCompleter *completer = new QCompleter(model);
-    // Is the model really considered sorted?
+    // TODO: Is the model really considered sorted?
     completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     completer->setCompletionMode(QCompleter::PopupCompletion);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
@@ -54,7 +55,7 @@ TagDialog::TagDialog(const FileTagListMap &fileTagListMap, const TagUsageList &t
 
     m_tagLayout = new FlowLayout;
     mainLayout->addLayout(m_tagLayout);
-    for(auto it = fileTagListMap.keyValueBegin(); it != fileTagListMap.keyValueEnd(); ++it)
+    for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
     {
         for(const auto &tag : it->second)
         {
@@ -66,9 +67,15 @@ TagDialog::TagDialog(const FileTagListMap &fileTagListMap, const TagUsageList &t
 
 void TagDialog::confirmTag()
 {
-    QString newTag = m_newTagName->text();
+    QString newTagName = m_newTagName->text();
     m_newTagName->clear();
 
-    TagWidget *tagWidget = new TagWidget(TMSUTag(newTag), this);
+    TMSUTag newTag(newTagName);
+    TagWidget *tagWidget = new TagWidget(newTag, this);
     m_tagLayout->addWidget(tagWidget);
+
+    for(auto it = m_fileTagSetMap.keyValueBegin(); it != m_fileTagSetMap.keyValueEnd(); ++it)
+    {
+        it->second.insert(newTag);
+    }
 }

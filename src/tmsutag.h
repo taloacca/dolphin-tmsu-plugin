@@ -2,7 +2,8 @@
 #define TMSUTAG_H
 
 #include <QString>
-#include <QList>
+#include <QSet>
+#include <QHash>
 
 class TMSUTag
 {
@@ -20,11 +21,15 @@ public:
     bool hasValue() const { return !m_value.isEmpty(); }
     const QString &getValue() const { return m_value; }
 
+    bool operator==(const TMSUTag &other) const;
+
 private:
     QString m_name;
     QString m_value;
 };
 
-typedef QList< TMSUTag > TMSUTagList;
+uint qHash(const TMSUTag &c) noexcept;
+
+typedef QSet< TMSUTag > TMSUTagSet;
 
 #endif // TMSUTAG_H

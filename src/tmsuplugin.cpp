@@ -50,13 +50,13 @@ QList< QAction* > TMSUPlugin::actions(const KFileItemListProperties& fileItemInf
     return actions;
 }
 
-TMSUTagList TMSUPlugin::getTagsForFile(const QString &file)
+TMSUTagSet TMSUPlugin::getTagsForFile(const QString &file)
 {
     TMSUPluginSettings* settings = TMSUPluginSettings::self();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("TMSU_DB", settings->dbPath());
 
-    TMSUTagList tags;
+    TMSUTagSet tags;
 
     QProcess process;
     process.setProcessEnvironment(env);
@@ -69,14 +69,14 @@ TMSUTagList TMSUPlugin::getTagsForFile(const QString &file)
             QString tagName = QTextCodec::codecForLocale()->toUnicode(buffer);
             // Remove newline
             tagName.chop(1);
-            tags += TMSUTag::fromEscapedString(tagName);
+            tags.insert(TMSUTag::fromEscapedString(tagName));
         }
     }
 
     return tags;
 }
 
-void TMSUPlugin::setTagsForFile(const QString &file, const TMSUTagList &tags)
+void TMSUPlugin::setTagsForFile(const QString &file, const TMSUTagSet &tags)
 {
     TMSUPluginSettings* settings = TMSUPluginSettings::self();
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -106,7 +106,7 @@ void TMSUPlugin::editTags()
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     env.insert("TMSU_DB", settings->dbPath());
 
-    FileTagListMap fileTagListMap;
+    FileTagSetMap fileTagSetMap;
     TagUsageList tagUsageList;
     {
         QProcess process;
@@ -140,10 +140,10 @@ void TMSUPlugin::editTags()
 
     for(const auto &url : urls)
     {
-        fileTagListMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
+        fileTagSetMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
     }
 
-    TagDialog tagDialog(fileTagListMap, tagUsageList);
+    TagDialog tagDialog(fileTagSetMap, tagUsageList);
     tagDialog.exec();
 }
 

@@ -21,8 +21,8 @@ public:
     QList< QAction* > actions(const KFileItemListProperties& fileItemInfos, QWidget* parentWidget) override;
 
 private:
-    TMSUTagList getTagsForFile(const QString &file);
-    void setTagsForFile(const QString &file, const TMSUTagList &tags);
+    TMSUTagSet getTagsForFile(const QString &file);
+    void setTagsForFile(const QString &file, const TMSUTagSet &tags);
 
 private Q_SLOTS:
     void editTags();
@@ -30,6 +30,6 @@ private Q_SLOTS:
     void pasteTags();
 
 private:
-    TMSUTagList m_copiedTags;
+    TMSUTagSet m_copiedTags;
 };
 #endif // TMSUPLUGIN_H
