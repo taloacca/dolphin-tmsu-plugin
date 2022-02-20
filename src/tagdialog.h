@@ -25,8 +25,11 @@ public:
 
 private Q_SLOTS:
     void confirmTag();
+    void removeTag();
 
 private:
+    void addTagWidget(const TMSUTag &tag);
+
     FileTagSetMap m_fileTagSetMap;
 
     QVBoxLayout *m_layout;

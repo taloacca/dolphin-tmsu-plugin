@@ -19,10 +19,10 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
         QFileInfo info(fileTagSetMap.keyValueBegin()->first);
         titleFilename = info.fileName();
     }
-    this->setWindowTitle(QStringLiteral("Edit TMSU tags for ") + titleFilename);
+    setWindowTitle(QStringLiteral("Edit TMSU tags for ") + titleFilename);
 
     m_layout = new QVBoxLayout(this);
-    this->setLayout(m_layout);
+    setLayout(m_layout);
 
     // TODO: need to decide how to handle multiple sets of tags on multiple files.  Show common tags only?
 
@@ -33,8 +33,6 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     m_completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     m_completer->setCompletionMode(QCompleter::PopupCompletion);
     m_completer->setCaseSensitivity(Qt::CaseInsensitive);
-
-    // TODO: hook up TagWidget delete buttons
 
     m_validator = new TagValidator(this);
 
@@ -54,11 +52,11 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     {
         for(const auto &tag : it->second)
         {
-            TagWidget *tagWidget = new TagWidget(tag, this);
-            m_tagLayout->addWidget(tagWidget);
+            addTagWidget(tag);
         }
     }
 
+    // TODO: add + button next to qlineedit.  It's more clear, and also wouldn't need this dummybutton any more
     // This dummy button is here just to work around some odd behavior in QDialogButtonBox...
     // If no button is set as 'default', then the QDialogButtonBox always makes its first button with the 'accept' role the default, even if
     // you set default/autoDefault to false on it, which then triggers when the return key is pressed (instead of just creating a new tag).
@@ -69,8 +67,8 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     dummyButton->setVisible(false);
 
     m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    this->connect(m_buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    this->connect(m_buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    connect(m_buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(m_buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
     m_buttonBox->setCenterButtons(true);
     m_layout->addWidget(m_buttonBox);
 }
@@ -96,7 +94,31 @@ void TagDialog::confirmTag()
 
     if(isTagNew)
     {
-        TagWidget *tagWidget = new TagWidget(newTag, this);
-        m_tagLayout->addWidget(tagWidget);
+        addTagWidget(newTag);
     }
+}
+
+void TagDialog::removeTag()
+{
+    TagWidget *tagWidget = qobject_cast<TagWidget *>(sender());
+    if(tagWidget)
+    {
+        {
+            TMSUTag tagVal = tagWidget->getTag();
+            for(auto it = m_fileTagSetMap.keyValueBegin(); it != m_fileTagSetMap.keyValueEnd(); ++it)
+            {
+                it->second.remove(tagVal);
+            }
+        }
+
+        m_tagLayout->removeWidget(tagWidget);
+        delete tagWidget;
+    }
+}
+
+void TagDialog::addTagWidget(const TMSUTag &tag)
+{
+    TagWidget *tagWidget = new TagWidget(tag, this);
+    connect(tagWidget, &TagWidget::deleteButtonPressed, this, &TagDialog::removeTag);
+    m_tagLayout->addWidget(tagWidget);
 }
