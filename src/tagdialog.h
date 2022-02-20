@@ -3,9 +3,14 @@
 
 #include "tmsutag.h"
 #include "tagusage.h"
+#include "tagvalidator.h"
+#include "tagusagelistmodel.h"
 #include "flowlayout.h"
 
 #include <QDialog>
+#include <QVBoxLayout>
+#include <QCompleter>
+#include <QDialogButtonBox>
 #include <QMap>
 #include <QLineEdit>
 
@@ -23,7 +28,13 @@ private Q_SLOTS:
 
 private:
     FileTagSetMap m_fileTagSetMap;
+
+    QVBoxLayout *m_layout;
+    QDialogButtonBox *m_buttonBox;
     FlowLayout *m_tagLayout;
     QLineEdit *m_newTagName;
+    TagValidator *m_validator;
+    QCompleter *m_completer;
+    TagUsageListModel *m_listModel;
 };
 #endif // TAGDIALOG_H

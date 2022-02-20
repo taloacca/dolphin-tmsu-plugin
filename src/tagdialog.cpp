@@ -1,14 +1,9 @@
 #include "tagdialog.h"
-#include "tagusagelistmodel.h"
 #include "tagwidget.h"
-#include "tagvalidator.h"
 
 #include <QString>
 #include <QFileInfo>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QLabel>
-#include <QCompleter>
 #include <QPushButton>
 
 TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tagUsageList, QWidget* parent) :
@@ -26,36 +21,35 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     }
     this->setWindowTitle(QStringLiteral("Edit TMSU tags for ") + titleFilename);
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    this->setLayout(mainLayout);
+    m_layout = new QVBoxLayout(this);
+    this->setLayout(m_layout);
 
     // TODO: need to decide how to handle multiple sets of tags on multiple files.  Show common tags only?
 
-    TagUsageListModel *model = new TagUsageListModel(tagUsageList, this);
+    m_listModel = new TagUsageListModel(tagUsageList, this);
 
-    QCompleter *completer = new QCompleter(model, this);
+    m_completer = new QCompleter(m_listModel, this);
     // TODO: Is the model really considered sorted?
-    completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
-    completer->setCompletionMode(QCompleter::PopupCompletion);
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    m_completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
+    m_completer->setCompletionMode(QCompleter::PopupCompletion);
+    m_completer->setCaseSensitivity(Qt::CaseInsensitive);
 
     // TODO: hook up TagWidget delete buttons
-    // TODO: add ok/cancel buttons on this dialog
 
-    TagValidator *validator = new TagValidator(this);
+    m_validator = new TagValidator(this);
 
     m_newTagName = new QLineEdit(this);
     m_newTagName->setMinimumWidth(400);
     m_newTagName->setClearButtonEnabled(true);
-    m_newTagName->setCompleter(completer);
-    m_newTagName->setValidator(validator);
-    mainLayout->addWidget(m_newTagName);
+    m_newTagName->setCompleter(m_completer);
+    m_newTagName->setValidator(m_validator);
+    m_layout->addWidget(m_newTagName);
 
     connect(m_newTagName, &QLineEdit::returnPressed, this, &TagDialog::confirmTag);
 
     // TODO: this messes things up if 'this' is FlowLayout parent
     m_tagLayout = new FlowLayout;
-    mainLayout->addLayout(m_tagLayout);
+    m_layout->addLayout(m_tagLayout);
     for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
     {
         for(const auto &tag : it->second)
@@ -64,6 +58,24 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
             m_tagLayout->addWidget(tagWidget);
         }
     }
+
+    // This dummy button is here just to work around some odd behavior in QDialogButtonBox...
+    // If no button is set as 'default', then the QDialogButtonBox always makes its first button with the 'accept' role the default, even if
+    // you set default/autoDefault to false on it, which then triggers when the return key is pressed (instead of just creating a new tag).
+    // So instead, we make this dummy button the default and hide it to prevent this from happening.
+    QPushButton *dummyButton = new QPushButton("Dummy Button", this);
+    dummyButton->setAutoDefault(true);
+    dummyButton->setDefault(true);
+    dummyButton->setVisible(false);
+
+    m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    // TODO: I'm not sure why I can't set this shortcut to CTRL+Enter.  If I do, it just focuses the button, but doesn't trigger it...
+    QPushButton *okButton = m_buttonBox->button(QDialogButtonBox::Ok);
+    okButton->setShortcut(Qt::CTRL | Qt::Key_Space);
+    this->connect(m_buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    this->connect(m_buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    m_buttonBox->setCenterButtons(true);
+    m_layout->addWidget(m_buttonBox);
 }
 
 void TagDialog::confirmTag()

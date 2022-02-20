@@ -144,7 +144,10 @@ void TMSUPlugin::editTags()
     }
 
     TagDialog tagDialog(fileTagSetMap, tagUsageList);
-    tagDialog.exec();
+    if(tagDialog.exec() == QDialog::Accepted)
+    {
+        qDebug() << "Accepted!";
+    }
     // TODO: once tagDialog is done, check for Accepted state, update tag set differences
 }
 
