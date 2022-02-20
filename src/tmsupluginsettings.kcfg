@@ -7,9 +7,5 @@
             <label>Path to TMSU database</label>
             <default>$HOME/.tmsu/db</default>
         </entry>
-        <entry name="MountPath" type="Path">
-            <label>Path to TMSU mount directory</label>
-            <default>$HOME/mp/</default>
-        </entry>
     </group>
 </kcfg>

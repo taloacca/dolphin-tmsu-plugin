@@ -12,6 +12,7 @@
 
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
+// TODO: handle settings file
 TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const QVariantList &args) :
     KAbstractFileItemActionPlugin(parent)
 {
