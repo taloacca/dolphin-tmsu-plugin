@@ -21,10 +21,8 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     setWindowTitle(QStringLiteral("Edit TMSU tags for ") + titleFilename);
 
     m_mainLayout = new QVBoxLayout(this);
-    setLayout(m_mainLayout);
 
     // TODO: need to decide how to handle multiple sets of tags on multiple files.  Show common tags only?
-    // TODO: qt warning about QLayout: Attempting to add QLayout "" to TagDialog "", which already has a layout
     // TODO: handle setting a value on a tag
 
     m_listModel = new TagUsageListModel(tagUsageList, this);
@@ -36,7 +34,7 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
 
     m_validator = new TagValidator(this);
 
-    m_editLineLayout = new QHBoxLayout(this);
+    m_editLineLayout = new QHBoxLayout();
     m_mainLayout->addLayout(m_editLineLayout);
 
     m_newTagName = new QLineEdit(this);
@@ -53,8 +51,7 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     connect(m_addButton, &QPushButton::clicked, this, &TagDialog::confirmTag);
     m_editLineLayout->addWidget(m_addButton);
 
-    // TODO: this messes things up if 'this' is FlowLayout parent
-    m_tagLayout = new FlowLayout;
+    m_tagLayout = new FlowLayout();
     m_mainLayout->addLayout(m_tagLayout);
     for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
     {

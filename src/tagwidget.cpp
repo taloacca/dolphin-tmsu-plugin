@@ -9,7 +9,6 @@ TagWidget::TagWidget(const TMSUTag &tag, QWidget* parent) : QFrame(parent), m_tm
     setFrameShadow(QFrame::Raised);
 
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
-    setLayout(mainLayout);
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
 
     QLabel *nameLabel = new QLabel(tag.getName(), this);
