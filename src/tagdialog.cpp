@@ -1,6 +1,7 @@
 #include "tagdialog.h"
 #include "tagusagelistmodel.h"
 #include "tagwidget.h"
+#include "tagvalidator.h"
 
 #include <QString>
 #include <QFileInfo>
@@ -40,10 +41,13 @@ TagDialog::TagDialog(const FileTagListMap &fileTagListMap, const TagUsageList &t
     completer->setCompletionMode(QCompleter::PopupCompletion);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
 
+    TagValidator *validator = new TagValidator(this);
+
     m_newTagName = new QLineEdit();
     m_newTagName->setMinimumWidth(400);
     m_newTagName->setClearButtonEnabled(true);
     m_newTagName->setCompleter(completer);
+    m_newTagName->setValidator(validator);
     mainLayout->addWidget(m_newTagName);
 
     connect(m_newTagName, &QLineEdit::returnPressed, this, &TagDialog::confirmTag);
@@ -63,30 +67,8 @@ TagDialog::TagDialog(const FileTagListMap &fileTagListMap, const TagUsageList &t
 void TagDialog::confirmTag()
 {
     QString newTag = m_newTagName->text();
-    if(!isValidTagName(newTag))
-    {
-        // TODO: pop up tooltip?
-        return;
-    }
     m_newTagName->clear();
 
     TagWidget *tagWidget = new TagWidget(TMSUTag(newTag), this);
     m_tagLayout->addWidget(tagWidget);
-}
-
-bool TagDialog::isValidTagName(const QString &tagName)
-{
-    bool invalid = false;
-    static QList< QString > badNames {".", "..", "and", "AND", "or", "OR", "not", "NOT", "eq", "EQ", "ne", "NE", "lt", "LT", "gt", "GT", "le", "LE", "ge", "GE"};
-    for(const auto &bad : badNames)
-    {
-        if(tagName == bad)
-        {
-            invalid = true;
-            break;
-        }
-    }
-    invalid |= tagName.contains("\\");
-    invalid |= tagName.contains("/");
-    return !invalid;
 }

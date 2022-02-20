@@ -18,8 +18,6 @@ class TagDialog : public QDialog
 public:
     explicit TagDialog(const FileTagListMap &fileTagMap, const TagUsageList &tagUsageList, QWidget* parent = nullptr);
 
-    static bool isValidTagName(const QString &tagName);
-
 private Q_SLOTS:
     void confirmTag();
 
