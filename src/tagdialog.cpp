@@ -69,13 +69,21 @@ void TagDialog::confirmTag()
 {
     QString newTagName = m_newTagName->text();
     m_newTagName->clear();
-
     TMSUTag newTag(newTagName);
-    TagWidget *tagWidget = new TagWidget(newTag, this);
-    m_tagLayout->addWidget(tagWidget);
 
+    bool isTagNew = false;
     for(auto it = m_fileTagSetMap.keyValueBegin(); it != m_fileTagSetMap.keyValueEnd(); ++it)
     {
-        it->second.insert(newTag);
+        if(!it->second.contains(newTag))
+        {
+            it->second.insert(newTag);
+            isTagNew = true;
+        }
+    }
+
+    if(isTagNew)
+    {
+        TagWidget *tagWidget = new TagWidget(newTag, this);
+        m_tagLayout->addWidget(tagWidget);
     }
 }
