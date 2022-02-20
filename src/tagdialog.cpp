@@ -56,7 +56,9 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     m_mainLayout->addLayout(m_tagLayout);
     for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
     {
-        for(const auto &tag : it->second)
+        QList< TMSUTag > sorted = it->second.values();
+        std::sort(sorted.begin(), sorted.end(), TMSUTag::tmsuTagComparator);
+        for(const auto &tag : sorted)
         {
             addTagWidget(tag);
         }

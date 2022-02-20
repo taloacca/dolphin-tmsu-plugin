@@ -25,6 +25,8 @@ class TagDialog : public QDialog
 public:
     explicit TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tagUsageList, QWidget* parent = nullptr);
 
+    const FileTagSetMap &getFileTagSetMap() const { return m_fileTagSetMap; }
+
 private Q_SLOTS:
     void confirmTag();
     void removeTag();

@@ -21,6 +21,7 @@ public:
     bool hasValue() const { return !m_value.isEmpty(); }
     const QString &getValue() const { return m_value; }
 
+    static bool tmsuTagComparator(const TMSUTag &t1, const TMSUTag &t2);
     bool operator==(const TMSUTag &other) const;
 
 private:
@@ -28,7 +29,7 @@ private:
     QString m_value;
 };
 
-uint qHash(const TMSUTag &c) noexcept;
+uint qHash(const TMSUTag &c, uint seed) noexcept;
 
 typedef QSet< TMSUTag > TMSUTagSet;
 

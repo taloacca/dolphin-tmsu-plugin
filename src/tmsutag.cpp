@@ -45,14 +45,22 @@ QString TMSUTag::toEscapedString() const
     return ret;
 }
 
-// Tags are unique based on name, so the value isn't used in these functions.
-// If tag with a value is being added, the tag name needs to be checked first.
-bool TMSUTag::operator==(const TMSUTag &other) const
+bool TMSUTag::tmsuTagComparator(const TMSUTag &t1, const TMSUTag &t2)
 {
-    return getName() == other.getName();
+    if(t1.getName() == t2.getName())
+        return t1.getValue() < t2.getValue();
+    return t1.getName() < t2.getName();
 }
 
-uint qHash(const TMSUTag &c) noexcept
+bool TMSUTag::operator==(const TMSUTag &other) const
 {
-    return qHash(c.getName());
+    return getName() == other.getName() &&
+           getValue() == other.getValue();
+}
+
+uint qHash(const TMSUTag &c, uint seed) noexcept
+{
+    seed = qHash(c.getName(), seed);
+    seed = qHash(c.getValue(), seed);
+    return seed;
 }
