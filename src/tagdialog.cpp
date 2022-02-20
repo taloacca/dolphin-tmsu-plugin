@@ -45,6 +45,9 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     connect(m_newTagName, &QLineEdit::returnPressed, this, &TagDialog::confirmTag);
     m_editLineLayout->addWidget(m_newTagName);
 
+    // Ensure that m_newTagName gets cleared correctly after choosing something from the completer
+    connect(m_completer, SIGNAL(activated(const QString&)), m_newTagName, SLOT(clear()), Qt::QueuedConnection);
+
     m_addButton = new QPushButton(QIcon::fromTheme(QStringLiteral("list-add")), "", this);
     m_addButton->setAutoDefault(true);
     m_addButton->setDefault(true);
