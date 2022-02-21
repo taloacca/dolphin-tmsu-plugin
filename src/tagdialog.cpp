@@ -4,12 +4,13 @@
 #include <QString>
 #include <QFileInfo>
 #include <QLabel>
+#include <QDebug>
 
 TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tagUsageList, QWidget* parent) :
-    QDialog(parent), m_fileTagSetMap(fileTagSetMap)
+    QDialog(parent), m_isEditingMultipleFiles(fileTagSetMap.size() > 1), m_fileTagSetMap(fileTagSetMap), m_additionalTagsWidget(nullptr)
 {
     QString titleFilename;
-    if(fileTagSetMap.size() > 1)
+    if(m_isEditingMultipleFiles)
     {
         titleFilename = "multiple files";
     }
@@ -56,14 +57,29 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     // TODO: Fix min size of flowlayout.  maybe also max size with scrollbar?
     m_tagLayout = new FlowLayout();
     m_mainLayout->addLayout(m_tagLayout);
+
+    QSet< TMSUTag > commonTagSet;
     for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
     {
-        QList< TMSUTag > sorted = it->second.values();
-        std::sort(sorted.begin(), sorted.end(), TMSUTag::tmsuTagComparator);
-        for(const auto &tag : sorted)
+        if(commonTagSet.isEmpty())
+            commonTagSet = it->second;
+        else
         {
-            addTagWidget(tag);
+            commonTagSet.intersect(it->second);
         }
+    }
+
+    for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
+    {
+        m_uncommonTagSet.unite(it->second - commonTagSet);
+    }
+
+
+    QList< TMSUTag > sorted = commonTagSet.values();
+    std::sort(sorted.begin(), sorted.end(), TMSUTag::tmsuTagComparator);
+    for(const auto &tag : sorted)
+    {
+        addTagWidget(tag);
     }
 
     m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -116,9 +132,46 @@ void TagDialog::removeTag()
     }
 }
 
+void TagDialog::removeUncommonTags()
+{
+    for(const auto &tag : m_uncommonTagSet)
+    {
+        for(auto it = m_fileTagSetMap.keyValueBegin(); it != m_fileTagSetMap.keyValueEnd(); ++it)
+        {
+            it->second.remove(tag);
+        }
+    }
+    m_uncommonTagSet.clear();
+    if(m_additionalTagsWidget)
+    {
+        m_tagLayout->removeWidget(m_additionalTagsWidget);
+        m_additionalTagsWidget->deleteLater();
+        m_additionalTagsWidget = nullptr;
+    }
+}
+
 void TagDialog::addTagWidget(const TMSUTag &tag)
 {
     TagWidget *tagWidget = new TagWidget(tag, this);
     connect(tagWidget, &TagWidget::deleteButtonPressed, this, &TagDialog::removeTag);
     m_tagLayout->addWidget(tagWidget);
+
+    // TODO: recompute uncommontagset
+    if(m_isEditingMultipleFiles)
+    {
+        if(m_additionalTagsWidget)
+        {
+            qDebug() << "Remove AdditionalTagsWidget!";
+            m_tagLayout->removeWidget(m_additionalTagsWidget);
+            m_additionalTagsWidget->deleteLater();
+            m_additionalTagsWidget = nullptr;
+        }
+        if(!m_uncommonTagSet.isEmpty())
+        {
+            qDebug() << "Add AdditionalTagsWidget!";
+            m_additionalTagsWidget = new AdditionalTagsWidget(this);
+            connect(m_additionalTagsWidget, &AdditionalTagsWidget::deleteButtonPressed, this, &TagDialog::removeUncommonTags);
+            m_tagLayout->addWidget(m_additionalTagsWidget);
+        }
+    }
 }

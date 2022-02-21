@@ -5,6 +5,7 @@
 #include "tagusage.h"
 #include "tagvalidator.h"
 #include "tagusagelistmodel.h"
+#include "additionaltagswidget.h"
 #include "flowlayout.h"
 
 #include <QDialog>
@@ -30,12 +31,16 @@ public:
 private Q_SLOTS:
     void confirmTag();
     void removeTag();
+    void removeUncommonTags();
 
 private:
     void addTagWidget(const TMSUTag &tag);
 
+    bool m_isEditingMultipleFiles;
     FileTagSetMap m_fileTagSetMap;
+    QSet< TMSUTag > m_uncommonTagSet;
 
+    AdditionalTagsWidget *m_additionalTagsWidget;
     QVBoxLayout *m_mainLayout;
     QHBoxLayout *m_editLineLayout;
 
