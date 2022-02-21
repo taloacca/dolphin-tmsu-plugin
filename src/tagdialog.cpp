@@ -4,7 +4,6 @@
 #include <QString>
 #include <QFileInfo>
 #include <QLabel>
-#include <QDebug>
 
 TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tagUsageList, QWidget* parent) :
     QDialog(parent), m_isEditingMultipleFiles(fileTagSetMap.size() > 1), m_fileTagSetMap(fileTagSetMap), m_additionalTagsWidget(nullptr)
@@ -55,8 +54,10 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     QSet< TMSUTag > commonTagSet;
     for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
     {
-        if(commonTagSet.isEmpty())
+        if(it == fileTagSetMap.keyValueBegin())
+        {
             commonTagSet = it->second;
+        }
         else
         {
             commonTagSet.intersect(it->second);
@@ -77,7 +78,6 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
 
     if(!m_uncommonTagSet.isEmpty())
     {
-        qDebug() << "Add AdditionalTagsWidget!";
         m_additionalTagsWidget = new AdditionalTagsWidget(this);
         connect(m_additionalTagsWidget, &AdditionalTagsWidget::deleteButtonPressed, this, &TagDialog::removeAllUncommonTags);
         m_tagLayout->addWidget(m_additionalTagsWidget);
