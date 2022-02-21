@@ -45,6 +45,18 @@ QString TMSUTag::toEscapedString() const
     return ret;
 }
 
+QString TMSUTag::toString() const
+{
+    QString ret;
+    ret = m_name;
+    if(hasValue())
+    {
+        ret += "=";
+        ret += m_value;
+    }
+    return ret;
+}
+
 bool TMSUTag::tmsuTagComparator(const TMSUTag &t1, const TMSUTag &t2)
 {
     if(t1.getName() == t2.getName())

@@ -79,6 +79,8 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     if(!m_uncommonTagSet.isEmpty())
     {
         m_additionalTagsWidget = new AdditionalTagsWidget(this);
+        updateAdditionTagsTooltip();
+
         connect(m_additionalTagsWidget, &AdditionalTagsWidget::deleteButtonPressed, this, &TagDialog::removeAllUncommonTags);
         m_tagLayout->addWidget(m_additionalTagsWidget);
     }
@@ -166,5 +168,22 @@ void TagDialog::addTagWidget(const TMSUTag &tag)
             m_additionalTagsWidget->deleteLater();
             m_additionalTagsWidget = nullptr;
         }
+    }
+    else
+    {
+        updateAdditionTagsTooltip();
+    }
+}
+
+void TagDialog::updateAdditionTagsTooltip()
+{
+    if(m_additionalTagsWidget)
+    {
+        QStringList tagStringList;
+        for(const auto &tag : m_uncommonTagSet.values())
+        {
+            tagStringList.append(tag.toString());
+        }
+        m_additionalTagsWidget->setToolTip(tagStringList.join(", "));
     }
 }

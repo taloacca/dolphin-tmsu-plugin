@@ -35,6 +35,7 @@ private Q_SLOTS:
 
 private:
     void addTagWidget(const TMSUTag &tag);
+    void updateAdditionTagsTooltip();
 
     bool m_isEditingMultipleFiles;
     FileTagSetMap m_fileTagSetMap;

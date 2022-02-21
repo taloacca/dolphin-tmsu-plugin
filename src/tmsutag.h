@@ -15,6 +15,7 @@ public:
     static QString unescapeString(const QString &str);
 
     QString toEscapedString() const;
+    QString toString() const;
 
     const QString &getName() const { return m_name; }
 
