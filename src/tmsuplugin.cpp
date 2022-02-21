@@ -8,18 +8,15 @@
 #include <QTextCodec>
 #include <QPair>
 #include <QMap>
-#include <QDebug>
 #include <QMessageBox>
 
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
-// TODO: handle settings file
 TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const QVariantList &args) :
     KAbstractFileItemActionPlugin(parent)
 {
     Q_UNUSED(metaData);
     Q_UNUSED(args);
-    TMSUTag tag(QStringLiteral("test"), QStringLiteral("value"));
 }
 
 QList< QAction* > TMSUPlugin::actions(const KFileItemListProperties& fileItemInfos, QWidget* parentWidget)
@@ -122,7 +119,6 @@ void TMSUPlugin::applyTagsForFile(const QString &file, const TMSUTagSet &tags, c
         messageBox.critical(0, "Error", "Couldn't run TMSU command!");
         return;
     }
-    qDebug() << "tmsu " << subcommand << " " << file << " " << "--tags" << " " << tagString;
     process.waitForFinished();
 }
 
