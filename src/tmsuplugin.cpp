@@ -4,6 +4,7 @@
 #include "tagdialog.h"
 #include "tagusage.h"
 
+#include <QFileInfo>
 #include <QProcess>
 #include <QTextCodec>
 #include <QPair>
@@ -23,6 +24,8 @@ TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const Q
 
 QList< QAction* > TMSUPlugin::actions(const KFileItemListProperties& fileItemInfos, QWidget* parentWidget)
 {
+    m_workingDirectory = QFileInfo(fileItemInfos.items().first().localPath()).path();
+
     QList< QAction* > actions;
 
     QAction* editAction = new QAction(QIcon::fromTheme(QStringLiteral("tag")), QStringLiteral("Edit TMSU Tags"), parentWidget);
@@ -62,6 +65,7 @@ TMSUTagSet TMSUPlugin::getTagsForFile(const QString &file)
 
     QProcess process;
     process.setProcessEnvironment(env);
+    process.setWorkingDirectory(m_workingDirectory);
     process.start("tmsu", {"tags", "-1", "--name", "never", file});
     while(process.waitForReadyRead())
     {
@@ -77,7 +81,7 @@ TMSUTagSet TMSUPlugin::getTagsForFile(const QString &file)
     if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
     {
         QMessageBox messageBox;
-        messageBox.critical(0, "Error", "Couldn't run TMSU command!");
+        messageBox.critical(0, "Error", "Error running TMSU command!");
         return TMSUTagSet();
     }
 
@@ -114,11 +118,12 @@ void TMSUPlugin::applyTagsForFile(const QString &file, const TMSUTagSet &tags, c
 
     QProcess process;
     process.setProcessEnvironment(env);
+    process.setWorkingDirectory(m_workingDirectory);
     process.start("tmsu", {subcommand, file, "--tags", tagString});
     if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
     {
         QMessageBox messageBox;
-        messageBox.critical(0, "Error", "Couldn't run TMSU command!");
+        messageBox.critical(0, "Error", "Error running TMSU command!");
         return;
     }
     process.waitForFinished();
@@ -137,6 +142,7 @@ void TMSUPlugin::editTags()
     {
         QProcess process;
         process.setProcessEnvironment(env);
+        process.setWorkingDirectory(m_workingDirectory);
         process.start("tmsu", {"info", "--usage", "--color", "never"});
         int lineIdx = 0;
         while(process.waitForReadyRead())
@@ -165,7 +171,7 @@ void TMSUPlugin::editTags()
         if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
         {
             QMessageBox messageBox;
-            messageBox.critical(0, "Error", "Couldn't run TMSU command!");
+            messageBox.critical(0, "Error", "Error running TMSU command!");
             return;
         }
     }

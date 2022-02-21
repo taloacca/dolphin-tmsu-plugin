@@ -4,6 +4,7 @@
 #include <KPluginFactory>
 #include <KAbstractFileItemActionPlugin>
 #include <KFileItemListProperties>
+#include <KFileItem>
 
 #include "tmsutag.h"
 
@@ -31,6 +32,7 @@ private Q_SLOTS:
     void pasteTags();
 
 private:
+    QString m_workingDirectory;
     TMSUTagSet m_copiedTags;
 };
 #endif // TMSUPLUGIN_H
