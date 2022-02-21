@@ -9,6 +9,7 @@
 #include <QPair>
 #include <QMap>
 #include <QDebug>
+#include <QMessageBox>
 
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
@@ -74,6 +75,12 @@ TMSUTagSet TMSUPlugin::getTagsForFile(const QString &file)
             tags.insert(TMSUTag::fromEscapedString(tagName));
         }
     }
+    if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
+    {
+        QMessageBox messageBox;
+        messageBox.critical(0, "Error", "Couldn't run TMSU command!");
+        return TMSUTagSet();
+    }
 
     return tags;
 }
@@ -106,10 +113,15 @@ void TMSUPlugin::applyTagsForFile(const QString &file, const TMSUTagSet &tags, c
 
     QString tagString = escapedTags.join(" ");
 
-    // TODO: really should be checking return values
     QProcess process;
     process.setProcessEnvironment(env);
     process.start("tmsu", {subcommand, file, "--tags", tagString});
+    if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
+    {
+        QMessageBox messageBox;
+        messageBox.critical(0, "Error", "Couldn't run TMSU command!");
+        return;
+    }
     qDebug() << "tmsu " << subcommand << " " << file << " " << "--tags" << " " << tagString;
     process.waitForFinished();
 }
@@ -151,6 +163,12 @@ void TMSUPlugin::editTags()
                 QString tagName = tagSummary.left(lastSpaceIdx).trimmed();
                 tagUsageList.append(TagUsage(tagName, tagCount));
             }
+        }
+        if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
+        {
+            QMessageBox messageBox;
+            messageBox.critical(0, "Error", "Couldn't run TMSU command!");
+            return;
         }
     }
 
