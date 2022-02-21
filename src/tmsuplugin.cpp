@@ -153,7 +153,7 @@ void TMSUPlugin::editTags()
                 // Remove newline
                 tagSummary.chop(1);
                 int lastSpaceIdx = tagSummary.lastIndexOf(' ');
-                int tagCount = tagSummary.mid(lastSpaceIdx-1).toInt();
+                int tagCount = tagSummary.mid(lastSpaceIdx+1).toInt();
 
                 // TODO: this won't work if a tag has leading or trailing whitespace, but it needs to be trimmed since the TMSU command adds whitespace for formatting
                 QString tagName = tagSummary.left(lastSpaceIdx).trimmed();

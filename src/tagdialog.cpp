@@ -25,6 +25,7 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
 
     m_listModel = new TagUsageListModel(tagUsageList, this);
 
+    // TODO: clicking on completer output doesn't work
     m_completer = new QCompleter(m_listModel, this);
     m_completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     m_completer->setCompletionMode(QCompleter::PopupCompletion);
