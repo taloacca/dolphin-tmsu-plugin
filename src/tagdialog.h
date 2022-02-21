@@ -31,7 +31,7 @@ public:
 private Q_SLOTS:
     void confirmTag();
     void removeTag();
-    void removeUncommonTags();
+    void removeAllUncommonTags();
 
 private:
     void addTagWidget(const TMSUTag &tag);

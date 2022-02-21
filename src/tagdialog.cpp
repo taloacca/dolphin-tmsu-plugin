@@ -23,8 +23,6 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
 
     m_mainLayout = new QVBoxLayout(this);
 
-    // TODO: need to decide how to handle multiple sets of tags on multiple files.  Show common tags only?
-
     m_listModel = new TagUsageListModel(tagUsageList, this);
 
     m_completer = new QCompleter(m_listModel, this);
@@ -74,12 +72,19 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
         m_uncommonTagSet.unite(it->second - commonTagSet);
     }
 
-
     QList< TMSUTag > sorted = commonTagSet.values();
     std::sort(sorted.begin(), sorted.end(), TMSUTag::tmsuTagComparator);
     for(const auto &tag : sorted)
     {
         addTagWidget(tag);
+    }
+
+    if(!m_uncommonTagSet.isEmpty())
+    {
+        qDebug() << "Add AdditionalTagsWidget!";
+        m_additionalTagsWidget = new AdditionalTagsWidget(this);
+        connect(m_additionalTagsWidget, &AdditionalTagsWidget::deleteButtonPressed, this, &TagDialog::removeAllUncommonTags);
+        m_tagLayout->addWidget(m_additionalTagsWidget);
     }
 
     m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -132,7 +137,7 @@ void TagDialog::removeTag()
     }
 }
 
-void TagDialog::removeUncommonTags()
+void TagDialog::removeAllUncommonTags()
 {
     for(const auto &tag : m_uncommonTagSet)
     {
@@ -156,22 +161,14 @@ void TagDialog::addTagWidget(const TMSUTag &tag)
     connect(tagWidget, &TagWidget::deleteButtonPressed, this, &TagDialog::removeTag);
     m_tagLayout->addWidget(tagWidget);
 
-    // TODO: recompute uncommontagset
-    if(m_isEditingMultipleFiles)
+    m_uncommonTagSet.remove(tag);
+    if(m_isEditingMultipleFiles && m_uncommonTagSet.isEmpty())
     {
         if(m_additionalTagsWidget)
         {
-            qDebug() << "Remove AdditionalTagsWidget!";
             m_tagLayout->removeWidget(m_additionalTagsWidget);
             m_additionalTagsWidget->deleteLater();
             m_additionalTagsWidget = nullptr;
-        }
-        if(!m_uncommonTagSet.isEmpty())
-        {
-            qDebug() << "Add AdditionalTagsWidget!";
-            m_additionalTagsWidget = new AdditionalTagsWidget(this);
-            connect(m_additionalTagsWidget, &AdditionalTagsWidget::deleteButtonPressed, this, &TagDialog::removeUncommonTags);
-            m_tagLayout->addWidget(m_additionalTagsWidget);
         }
     }
 }
