@@ -25,7 +25,6 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
 
     m_listModel = new TagUsageListModel(tagUsageList, this);
 
-    // TODO: clicking on completer output doesn't work
     m_completer = new QCompleter(m_listModel, this);
     m_completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     m_completer->setCompletionMode(QCompleter::PopupCompletion);
@@ -41,11 +40,7 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     m_newTagName->setClearButtonEnabled(true);
     m_newTagName->setCompleter(m_completer);
     m_newTagName->setValidator(m_validator);
-    connect(m_newTagName, &QLineEdit::returnPressed, this, &TagDialog::confirmTag);
     m_editLineLayout->addWidget(m_newTagName);
-
-    // Ensure that m_newTagName gets cleared correctly after choosing something from the completer
-    connect(m_completer, SIGNAL(activated(const QString&)), m_newTagName, SLOT(clear()), Qt::QueuedConnection);
 
     m_addButton = new QPushButton(QIcon::fromTheme(QStringLiteral("list-add")), "", this);
     m_addButton->setAutoDefault(true);
