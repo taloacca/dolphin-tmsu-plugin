@@ -79,6 +79,46 @@ TMSUTagSet TMSUPlugin::getTagsForFile(const QString &file)
     return tags;
 }
 
+TagUsageList TMSUPlugin::getTagUsage()
+{
+    TagUsageList tagUsage;
+    QProcess process;
+    process.setWorkingDirectory(m_workingDirectory);
+    process.start("tmsu", {"info", "--usage", "--color", "never"});
+    int lineIdx = 0;
+    while(process.waitForReadyRead())
+    {
+        char buffer[512];
+        while (process.readLine(buffer, sizeof(buffer)) > 0)
+        {
+            // Skip unnecessary output that isn't about tag usage
+            if(lineIdx < 4)
+            {
+                lineIdx++;
+                continue;
+            }
+
+            QString tagSummary = QTextCodec::codecForLocale()->toUnicode(buffer);
+            // Remove newline
+            tagSummary.chop(1);
+            int lastSpaceIdx = tagSummary.lastIndexOf(' ');
+            int tagCount = tagSummary.mid(lastSpaceIdx+1).toInt();
+
+            // TODO: this won't work if a tag has leading or trailing whitespace, but it needs to be trimmed since the TMSU command adds whitespace for formatting
+            QString tagName = tagSummary.left(lastSpaceIdx).trimmed();
+            tagUsage.append(TagUsage(tagName, tagCount));
+        }
+    }
+    if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
+    {
+        QMessageBox messageBox;
+        messageBox.critical(0, "Error", "Error running TMSU command!");
+        return TagUsageList();
+    }
+
+    return tagUsage;
+}
+
 void TMSUPlugin::setFileTagSetMap(const FileTagSetMap &oldFileTagSetMap, const FileTagSetMap &newFileTagSetMap)
 {
     FileTagSetMap tagRemoveMap;
@@ -159,42 +199,7 @@ void TMSUPlugin::editTags()
     const QList< QUrl > urls = sender()->property("urls").value< QList< QUrl > >();
 
     FileTagSetMap oldFileTagSetMap;
-    TagUsageList tagUsageList;
-    {
-        QProcess process;
-        process.setWorkingDirectory(m_workingDirectory);
-        process.start("tmsu", {"info", "--usage", "--color", "never"});
-        int lineIdx = 0;
-        while(process.waitForReadyRead())
-        {
-            char buffer[512];
-            while (process.readLine(buffer, sizeof(buffer)) > 0)
-            {
-                // Skip unnecessary output that isn't about tag usage
-                if(lineIdx < 4)
-                {
-                    lineIdx++;
-                    continue;
-                }
-
-                QString tagSummary = QTextCodec::codecForLocale()->toUnicode(buffer);
-                // Remove newline
-                tagSummary.chop(1);
-                int lastSpaceIdx = tagSummary.lastIndexOf(' ');
-                int tagCount = tagSummary.mid(lastSpaceIdx+1).toInt();
-
-                // TODO: this won't work if a tag has leading or trailing whitespace, but it needs to be trimmed since the TMSU command adds whitespace for formatting
-                QString tagName = tagSummary.left(lastSpaceIdx).trimmed();
-                tagUsageList.append(TagUsage(tagName, tagCount));
-            }
-        }
-        if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
-        {
-            QMessageBox messageBox;
-            messageBox.critical(0, "Error", "Error running TMSU command!");
-            return;
-        }
-    }
+    TagUsageList tagUsageList = getTagUsage();
 
     for(const auto &url : urls)
     {
