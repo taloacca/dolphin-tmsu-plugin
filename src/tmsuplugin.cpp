@@ -10,6 +10,7 @@
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
 
+// TODO: some sort of progress bar popup for big jobs?
 TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const QVariantList &args) :
     KAbstractFileItemActionPlugin(parent)
 {
@@ -78,13 +79,13 @@ TMSUTagSet TMSUPlugin::getTagsForFile(const QString &file)
     return tags;
 }
 
-void TMSUPlugin::setFileTagSetMap(const FileTagSetMap &fileTagSetMap)
+void TMSUPlugin::setFileTagSetMap(const FileTagSetMap &oldFileTagSetMap, const FileTagSetMap &newFileTagSetMap)
 {
     FileTagSetMap tagRemoveMap;
     FileTagSetMap tagAddMap;
-    for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
+    for(auto it = newFileTagSetMap.keyValueBegin(); it != newFileTagSetMap.keyValueEnd(); ++it)
     {
-        TMSUTagSet oldTags = getTagsForFile(it->first);
+        TMSUTagSet oldTags = oldFileTagSetMap[it->first];
 
         TMSUTagSet tagsToRemove = oldTags - it->second;
         TMSUTagSet tagsToAdd = it->second - oldTags;
@@ -103,13 +104,6 @@ void TMSUPlugin::setFileTagSetMap(const FileTagSetMap &fileTagSetMap)
 
     if(!tagAddMap.isEmpty())
         addTagsForFiles(tagAddMap);
-}
-
-// In the paste case, since no tags are ever deleted, we can skip a lot of work normally done in setFileTagSetMap
-void TMSUPlugin::pasteFileTagSetMap(const FileTagSetMap &fileTagSetMap)
-{
-    if(!fileTagSetMap.isEmpty())
-        addTagsForFiles(fileTagSetMap);
 }
 
 void TMSUPlugin::removeTagsForFile(const QString &file, const TMSUTagSet &tags)
@@ -164,7 +158,7 @@ void TMSUPlugin::editTags()
 {
     const QList< QUrl > urls = sender()->property("urls").value< QList< QUrl > >();
 
-    FileTagSetMap fileTagSetMap;
+    FileTagSetMap oldFileTagSetMap;
     TagUsageList tagUsageList;
     {
         QProcess process;
@@ -204,14 +198,14 @@ void TMSUPlugin::editTags()
 
     for(const auto &url : urls)
     {
-        fileTagSetMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
+        oldFileTagSetMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
     }
 
-    TagDialog tagDialog(fileTagSetMap, tagUsageList);
+    TagDialog tagDialog(oldFileTagSetMap, tagUsageList);
     if(tagDialog.exec() == QDialog::Accepted)
     {
         FileTagSetMap newFileTagSetMap = tagDialog.getFileTagSetMap();
-        setFileTagSetMap(newFileTagSetMap);
+        setFileTagSetMap(oldFileTagSetMap, newFileTagSetMap);
     }
 }
 
@@ -227,12 +221,15 @@ void TMSUPlugin::pasteTags()
 {
     const QList< QUrl > urls = sender()->property("urls").value< QList< QUrl > >();
 
-    FileTagSetMap fileTagSetMap;
+    FileTagSetMap newFileTagSetMap;
     for(const auto &url : urls)
     {
-        fileTagSetMap[url.toLocalFile()] = m_copiedTags;
+        newFileTagSetMap[url.toLocalFile()] = m_copiedTags;
     }
-    pasteFileTagSetMap(fileTagSetMap);
+
+    // Since pasting won't delete tags, existing tags don't matter
+    FileTagSetMap emptyFileTagSetMap;
+    setFileTagSetMap(emptyFileTagSetMap, newFileTagSetMap);
 }
 
 #include "tmsuplugin.moc"
