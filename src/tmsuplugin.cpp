@@ -105,6 +105,13 @@ void TMSUPlugin::setFileTagSetMap(const FileTagSetMap &fileTagSetMap)
         addTagsForFiles(tagAddMap);
 }
 
+// In the paste case, since no tags are ever deleted, we can skip a lot of work normally done in setFileTagSetMap
+void TMSUPlugin::pasteFileTagSetMap(const FileTagSetMap &fileTagSetMap)
+{
+    if(!fileTagSetMap.isEmpty())
+        addTagsForFiles(fileTagSetMap);
+}
+
 void TMSUPlugin::removeTagsForFile(const QString &file, const TMSUTagSet &tags)
 {
     QList< QString > escapedTags;
@@ -225,7 +232,7 @@ void TMSUPlugin::pasteTags()
     {
         fileTagSetMap[url.toLocalFile()] = m_copiedTags;
     }
-    setFileTagSetMap(fileTagSetMap);
+    pasteFileTagSetMap(fileTagSetMap);
 }
 
 #include "tmsuplugin.moc"
