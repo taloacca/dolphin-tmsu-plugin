@@ -24,13 +24,19 @@ TMSUTag TMSUTag::fromEscapedString(const QString &str)
 QString TMSUTag::escapeString(const QString &str)
 {
     QString tmp = str;
-    return tmp.replace(" ", "\\ ").replace("=", "\\=");
+    return tmp.replace(" ", "\\ ")
+              .replace("=", "\\=")
+              .replace("\"", "\\\"")
+              .replace("'", "\\'");
 }
 
 QString TMSUTag::unescapeString(const QString &str)
 {
     QString tmp = str;
-    return tmp.replace("\\ ", " ").replace("\\=", "=");
+    return tmp.replace("\\ ", " ")
+              .replace("\\=", "=")
+              .replace("\\\"", "\"")
+              .replace("\\'", "'");
 }
 
 QString TMSUTag::toEscapedString() const

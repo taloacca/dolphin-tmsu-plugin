@@ -7,6 +7,7 @@
 #include <KFileItem>
 
 #include "tmsutag.h"
+#include "tagdialog.h"
 
 #include <QAction>
 #include <QObject>
@@ -23,8 +24,9 @@ public:
 
 private:
     TMSUTagSet getTagsForFile(const QString &file);
-    void setNewTagsForFile(const QString &file, const TMSUTagSet &newTags);
-    void applyTagsForFile(const QString &file, const TMSUTagSet &tags, const bool adding);
+    void setFileTagSetMap(const FileTagSetMap &fileTagSetMap);
+    void removeTagsForFile(const QString &file, const TMSUTagSet &tagSet);
+    void addTagsForFiles(const QMap< QString, TMSUTagSet > &tagAddMap);
 
 private Q_SLOTS:
     void editTags();

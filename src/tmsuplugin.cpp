@@ -1,6 +1,5 @@
 #include "tmsuplugin.h"
 
-#include "tagdialog.h"
 #include "tagusage.h"
 
 #include <QFileInfo>
@@ -81,25 +80,37 @@ TMSUTagSet TMSUPlugin::getTagsForFile(const QString &file)
     return tags;
 }
 
-void TMSUPlugin::setNewTagsForFile(const QString &file, const TMSUTagSet &newTags)
+void TMSUPlugin::setFileTagSetMap(const FileTagSetMap &fileTagSetMap)
 {
-    TMSUTagSet oldTags = getTagsForFile(file);
+    QMap< QString, TMSUTagSet > tagRemoveMap;
+    QMap< QString, TMSUTagSet > tagAddMap;
+    for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
+    {
+        TMSUTagSet oldTags = getTagsForFile(it->first);
 
-    TMSUTagSet tagsToRemove = oldTags - newTags;
-    TMSUTagSet tagsToAdd = newTags - oldTags;
+        TMSUTagSet tagsToRemove = oldTags - it->second;
+        TMSUTagSet tagsToAdd = it->second - oldTags;
 
-    if(!tagsToRemove.isEmpty())
-        applyTagsForFile(file, tagsToRemove, false);
-    if(!tagsToAdd.isEmpty())
-        applyTagsForFile(file, tagsToAdd, true);
+        if(!tagsToRemove.isEmpty())
+            tagRemoveMap[it->first] = tagsToRemove;
+        if(!tagsToAdd.isEmpty())
+            tagAddMap[it->first] = tagsToAdd;
+    }
+
+    for(auto it = tagRemoveMap.keyValueBegin(); it != tagRemoveMap.keyValueEnd(); ++it)
+    {
+        if(!it->second.isEmpty())
+            removeTagsForFile(it->first, it->second);
+    }
+
+    if(!tagAddMap.isEmpty())
+        addTagsForFiles(tagAddMap);
 }
 
-void TMSUPlugin::applyTagsForFile(const QString &file, const TMSUTagSet &tags, const bool adding)
+void TMSUPlugin::removeTagsForFile(const QString &file, const TMSUTagSet &tags)
 {
-    QString subcommand = adding ? "tag" : "untag";
-
     QList< QString > escapedTags;
-    for(auto &tag : tags)
+    for(const auto &tag : tags)
     {
         escapedTags.append(tag.toEscapedString());
     }
@@ -108,7 +119,7 @@ void TMSUPlugin::applyTagsForFile(const QString &file, const TMSUTagSet &tags, c
 
     QProcess process;
     process.setWorkingDirectory(m_workingDirectory);
-    process.start("tmsu", {subcommand, file, "--tags", tagString});
+    process.start("tmsu", {"untag", file, "--tags", tagString});
     if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
     {
         QMessageBox messageBox;
@@ -116,6 +127,32 @@ void TMSUPlugin::applyTagsForFile(const QString &file, const TMSUTagSet &tags, c
         return;
     }
     process.waitForFinished();
+}
+
+void TMSUPlugin::addTagsForFiles(const QMap< QString, TMSUTagSet > &tagAddMap)
+{
+    QProcess process;
+    process.setWorkingDirectory(m_workingDirectory);
+    process.start("tmsu", {"tag", "-"});
+    for(auto it = tagAddMap.keyValueBegin(); it != tagAddMap.keyValueEnd(); ++it)
+    {
+        QList< QString > escapedTags;
+        for(const auto &tag : it->second)
+        {
+            escapedTags.append(tag.toEscapedString());
+        }
+
+        QString tagString = escapedTags.join(" ");
+        process.write("\"" + it->first.toUtf8() + "\" \"" + tagString.toUtf8() + "\"\n");
+    }
+    process.closeWriteChannel();
+    process.waitForFinished();
+    if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
+    {
+        QMessageBox messageBox;
+        messageBox.critical(0, "Error", "Error running TMSU command!");
+        return;
+    }
 }
 
 void TMSUPlugin::editTags()
@@ -169,10 +206,7 @@ void TMSUPlugin::editTags()
     if(tagDialog.exec() == QDialog::Accepted)
     {
         FileTagSetMap newFileTagSetMap = tagDialog.getFileTagSetMap();
-        for(auto it = newFileTagSetMap.keyValueBegin(); it != newFileTagSetMap.keyValueEnd(); ++it)
-        {
-            setNewTagsForFile(it->first, it->second);
-        }
+        setFileTagSetMap(newFileTagSetMap);
     }
 }
 
@@ -188,10 +222,12 @@ void TMSUPlugin::pasteTags()
 {
     const QList< QUrl > urls = sender()->property("urls").value< QList< QUrl > >();
 
+    FileTagSetMap fileTagSetMap;
     for(const auto &url : urls)
     {
-        setNewTagsForFile(url.toLocalFile(), m_copiedTags);
+        fileTagSetMap[url.toLocalFile()] = m_copiedTags;
     }
+    setFileTagSetMap(fileTagSetMap);
 }
 
 #include "tmsuplugin.moc"
