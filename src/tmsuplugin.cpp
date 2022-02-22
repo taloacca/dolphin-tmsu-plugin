@@ -182,7 +182,7 @@ void TMSUPlugin::addTagsForFiles(const FileTagSetMap &tagAddMap)
         }
 
         QString tagString = escapedTags.join(" ");
-        process.write("\"" + it->first.toUtf8() + "\" \"" + tagString.toUtf8() + "\"\n");
+        process.write("\"" + it->first.toUtf8() + "\" " + tagString.toUtf8() + "\n");
     }
     process.closeWriteChannel();
     process.waitForFinished();
