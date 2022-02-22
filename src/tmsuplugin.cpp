@@ -5,8 +5,6 @@
 #include <QFileInfo>
 #include <QProcess>
 #include <QTextCodec>
-#include <QPair>
-#include <QMap>
 #include <QMessageBox>
 
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
@@ -82,8 +80,8 @@ TMSUTagSet TMSUPlugin::getTagsForFile(const QString &file)
 
 void TMSUPlugin::setFileTagSetMap(const FileTagSetMap &fileTagSetMap)
 {
-    QMap< QString, TMSUTagSet > tagRemoveMap;
-    QMap< QString, TMSUTagSet > tagAddMap;
+    FileTagSetMap tagRemoveMap;
+    FileTagSetMap tagAddMap;
     for(auto it = fileTagSetMap.keyValueBegin(); it != fileTagSetMap.keyValueEnd(); ++it)
     {
         TMSUTagSet oldTags = getTagsForFile(it->first);
@@ -129,7 +127,7 @@ void TMSUPlugin::removeTagsForFile(const QString &file, const TMSUTagSet &tags)
     process.waitForFinished();
 }
 
-void TMSUPlugin::addTagsForFiles(const QMap< QString, TMSUTagSet > &tagAddMap)
+void TMSUPlugin::addTagsForFiles(const FileTagSetMap &tagAddMap)
 {
     QProcess process;
     process.setWorkingDirectory(m_workingDirectory);

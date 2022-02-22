@@ -26,7 +26,7 @@ private:
     TMSUTagSet getTagsForFile(const QString &file);
     void setFileTagSetMap(const FileTagSetMap &fileTagSetMap);
     void removeTagsForFile(const QString &file, const TMSUTagSet &tagSet);
-    void addTagsForFiles(const QMap< QString, TMSUTagSet > &tagAddMap);
+    void addTagsForFiles(const FileTagSetMap &tagAddMap);
 
 private Q_SLOTS:
     void editTags();

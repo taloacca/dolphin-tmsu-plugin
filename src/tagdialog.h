@@ -17,7 +17,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 
-typedef QMap< QString, QSet< TMSUTag > > FileTagSetMap;
+typedef QMap< QString, TMSUTagSet > FileTagSetMap;
 
 class TagDialog : public QDialog
 {
@@ -39,7 +39,7 @@ private:
 
     bool m_isEditingMultipleFiles;
     FileTagSetMap m_fileTagSetMap;
-    QSet< TMSUTag > m_uncommonTagSet;
+    TMSUTagSet m_uncommonTagSet;
 
     AdditionalTagsWidget *m_additionalTagsWidget;
     QVBoxLayout *m_mainLayout;
