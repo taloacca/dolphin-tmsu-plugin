@@ -13,13 +13,7 @@ target_sources(tmsuplugin PRIVATE
     flowlayout.cpp
 )
 
-kconfig_add_kcfg_files(tmsuplugin
-    tmsupluginsettings.kcfgc
-)
-
 target_link_libraries(tmsuplugin
     KF5::XmlGui
     KF5::KIOWidgets
 )
-
-install(FILES tmsupluginsettings.kcfg DESTINATION ${KDE_INSTALL_KCFGDIR})

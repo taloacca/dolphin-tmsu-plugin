@@ -1,5 +1,4 @@
 #include "tmsuplugin.h"
-#include "tmsupluginsettings.h"
 
 #include "tagdialog.h"
 #include "tagusage.h"
@@ -14,7 +13,6 @@
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
 
-// TODO: do I even need settings for db path?  can this just be pulled in via env vars?
 TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const QVariantList &args) :
     KAbstractFileItemActionPlugin(parent)
 {
@@ -57,14 +55,9 @@ QList< QAction* > TMSUPlugin::actions(const KFileItemListProperties& fileItemInf
 
 TMSUTagSet TMSUPlugin::getTagsForFile(const QString &file)
 {
-    TMSUPluginSettings* settings = TMSUPluginSettings::self();
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    env.insert("TMSU_DB", settings->dbPath());
-
     TMSUTagSet tags;
 
     QProcess process;
-    process.setProcessEnvironment(env);
     process.setWorkingDirectory(m_workingDirectory);
     process.start("tmsu", {"tags", "-1", "--name", "never", file});
     while(process.waitForReadyRead())
@@ -104,9 +97,6 @@ void TMSUPlugin::setNewTagsForFile(const QString &file, const TMSUTagSet &newTag
 void TMSUPlugin::applyTagsForFile(const QString &file, const TMSUTagSet &tags, const bool adding)
 {
     QString subcommand = adding ? "tag" : "untag";
-    TMSUPluginSettings* settings = TMSUPluginSettings::self();
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    env.insert("TMSU_DB", settings->dbPath());
 
     QList< QString > escapedTags;
     for(auto &tag : tags)
@@ -117,7 +107,6 @@ void TMSUPlugin::applyTagsForFile(const QString &file, const TMSUTagSet &tags, c
     QString tagString = escapedTags.join(" ");
 
     QProcess process;
-    process.setProcessEnvironment(env);
     process.setWorkingDirectory(m_workingDirectory);
     process.start("tmsu", {subcommand, file, "--tags", tagString});
     if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
@@ -133,15 +122,10 @@ void TMSUPlugin::editTags()
 {
     const QList< QUrl > urls = sender()->property("urls").value< QList< QUrl > >();
 
-    TMSUPluginSettings* settings = TMSUPluginSettings::self();
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    env.insert("TMSU_DB", settings->dbPath());
-
     FileTagSetMap fileTagSetMap;
     TagUsageList tagUsageList;
     {
         QProcess process;
-        process.setProcessEnvironment(env);
         process.setWorkingDirectory(m_workingDirectory);
         process.start("tmsu", {"info", "--usage", "--color", "never"});
         int lineIdx = 0;

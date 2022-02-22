@@ -1,4 +1,0 @@
-File=tmsupluginsettings.kcfg
-ClassName=TMSUPluginSettings
-Singleton=true
-Mutators=true
