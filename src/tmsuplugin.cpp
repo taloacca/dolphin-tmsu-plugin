@@ -2,7 +2,6 @@
 
 #include "tagusage.h"
 
-#include <QApplication>
 #include <QFileInfo>
 #include <QProcess>
 #include <QTextCodec>
@@ -143,13 +142,13 @@ void TMSUPlugin::setFileTagSetMap(const FileTagSetMap &oldFileTagSetMap, const F
 
     {
         QProgressDialog progress(QStringLiteral("Removing tags for files..."), "", 0, tagRemoveMap.size());
+        progress.setWindowModality(Qt::WindowModal);
         progress.setMinimumDuration(1500);
         progress.setCancelButton(nullptr);
         int filesDone = 0;
         for(auto it = tagRemoveMap.keyValueBegin(); it != tagRemoveMap.keyValueEnd(); ++it)
         {
             progress.setValue(filesDone++);
-            QApplication::processEvents();
 
             if(!it->second.isEmpty())
                 removeTagsForFile(it->first, it->second);
@@ -191,6 +190,7 @@ void TMSUPlugin::addTagsForFiles(const FileTagSetMap &tagAddMap)
     // Progress dialog is less useful here.  Writing to the process is so fast that almost all of the time is spent waiting for the process to finish, so there
     // isn't a great way to determine overall progress.
     QProgressDialog progress(QStringLiteral("Adding tags for files..."), "", 0, 0);
+    progress.setWindowModality(Qt::WindowModal);
     progress.setCancelButton(nullptr);
     if(tagAddMap.size() > 100)
     {
@@ -199,8 +199,6 @@ void TMSUPlugin::addTagsForFiles(const FileTagSetMap &tagAddMap)
     }
     for(auto it = tagAddMap.keyValueBegin(); it != tagAddMap.keyValueEnd(); ++it)
     {
-        QApplication::processEvents();
-
         QList< QString > escapedTags;
         for(const auto &tag : it->second)
         {
@@ -229,13 +227,13 @@ void TMSUPlugin::editTags()
 
     {
         QProgressDialog progress(QStringLiteral("Fetching tags for files..."), "", 0, urls.size());
+        progress.setWindowModality(Qt::WindowModal);
         progress.setMinimumDuration(1500);
         progress.setCancelButton(nullptr);
         int filesDone = 0;
         for(const auto &url : urls)
         {
             progress.setValue(filesDone++);
-            QApplication::processEvents();
 
             oldFileTagSetMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
         }
