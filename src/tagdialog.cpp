@@ -35,6 +35,7 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     m_mainLayout->addLayout(m_editLineLayout);
 
     m_newTagName = new QLineEdit(this);
+    m_newTagName->setPlaceholderText(QStringLiteral("Tag Name"));
     m_newTagName->setMinimumWidth(400);
     m_newTagName->setClearButtonEnabled(true);
     m_newTagName->setCompleter(m_completer);
