@@ -187,16 +187,10 @@ void TMSUPlugin::addTagsForFiles(const FileTagSetMap &tagAddMap)
     process.setWorkingDirectory(m_workingDirectory);
     process.start("tmsu", {"tag", "-"});
 
-    QProgressDialog progress(QStringLiteral("Settings tags for files..."), "", 0, tagAddMap.size());
-    progress.setMinimumDuration(1500);
-    progress.setCancelButton(nullptr);
-    int filesDone = 0;
-
+    // No progress dialog here.  Writing to the process is so fast that almost all of the time is spent waiting for the process to finish, and there isn't any
+    // useful output to derive a progress value from.
     for(auto it = tagAddMap.keyValueBegin(); it != tagAddMap.keyValueEnd(); ++it)
     {
-        progress.setValue(filesDone++);
-        QApplication::processEvents();
-
         QList< QString > escapedTags;
         for(const auto &tag : it->second)
         {
