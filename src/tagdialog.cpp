@@ -5,7 +5,7 @@
 #include <QFileInfo>
 #include <QLabel>
 
-TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tagUsageList, const TagUsageList &valueUsageList, QWidget* parent) :
+TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tagUsageList, QWidget* parent) :
     QDialog(parent), m_isEditingMultipleFiles(fileTagSetMap.size() > 1), m_fileTagSetMap(fileTagSetMap), m_additionalTagsWidget(nullptr)
 {
     QString titleFilename;
@@ -23,17 +23,11 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     m_mainLayout = new QVBoxLayout(this);
 
     m_tagListModel = new TagUsageListModel(tagUsageList, this);
-    m_valueListModel = new TagUsageListModel(valueUsageList, this);
 
     m_tagCompleter = new QCompleter(m_tagListModel, this);
     m_tagCompleter->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     m_tagCompleter->setCompletionMode(QCompleter::PopupCompletion);
     m_tagCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-
-    m_valueCompleter = new QCompleter(m_valueListModel, this);
-    m_valueCompleter->setModelSorting(QCompleter::CaseSensitivelySortedModel);
-    m_valueCompleter->setCompletionMode(QCompleter::PopupCompletion);
-    m_valueCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 
     m_validator = new TagValidator(this);
 
@@ -52,7 +46,6 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     m_newTagValue->setPlaceholderText(QStringLiteral("Tag Value (Optional)"));
     m_newTagValue->setMinimumWidth(200);
     m_newTagValue->setClearButtonEnabled(true);
-    m_newTagValue->setCompleter(m_valueCompleter);
     m_newTagValue->setValidator(m_validator);
     m_editLineLayout->addWidget(m_newTagValue);
 
