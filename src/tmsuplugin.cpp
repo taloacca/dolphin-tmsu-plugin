@@ -2,15 +2,19 @@
 
 #include "tagusage.h"
 
+#include <QApplication>
 #include <QFileInfo>
 #include <QProcess>
 #include <QTextCodec>
 #include <QMessageBox>
+#include <QProgressDialog>
 
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
 
-// TODO: some sort of progress bar popup for big jobs?
+// TODO: better error messages from QProcess failures
+// TODO: cancel buttons on QProgressDialogs?
+// TODO: batch tag getting as a stopgap until I can add stdin?
 TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const QVariantList &args) :
     KAbstractFileItemActionPlugin(parent)
 {
@@ -136,10 +140,19 @@ void TMSUPlugin::setFileTagSetMap(const FileTagSetMap &oldFileTagSetMap, const F
             tagAddMap[it->first] = tagsToAdd;
     }
 
-    for(auto it = tagRemoveMap.keyValueBegin(); it != tagRemoveMap.keyValueEnd(); ++it)
     {
-        if(!it->second.isEmpty())
-            removeTagsForFile(it->first, it->second);
+        QProgressDialog progress(QStringLiteral("Removing tags for files..."), "", 0, tagRemoveMap.size());
+        progress.setMinimumDuration(1500);
+        progress.setCancelButton(nullptr);
+        int filesDone = 0;
+        for(auto it = tagRemoveMap.keyValueBegin(); it != tagRemoveMap.keyValueEnd(); ++it)
+        {
+            progress.setValue(filesDone++);
+            QApplication::processEvents();
+
+            if(!it->second.isEmpty())
+                removeTagsForFile(it->first, it->second);
+        }
     }
 
     if(!tagAddMap.isEmpty())
@@ -173,8 +186,17 @@ void TMSUPlugin::addTagsForFiles(const FileTagSetMap &tagAddMap)
     QProcess process;
     process.setWorkingDirectory(m_workingDirectory);
     process.start("tmsu", {"tag", "-"});
+
+    QProgressDialog progress(QStringLiteral("Settings tags for files..."), "", 0, tagAddMap.size());
+    progress.setMinimumDuration(1500);
+    progress.setCancelButton(nullptr);
+    int filesDone = 0;
+
     for(auto it = tagAddMap.keyValueBegin(); it != tagAddMap.keyValueEnd(); ++it)
     {
+        progress.setValue(filesDone++);
+        QApplication::processEvents();
+
         QList< QString > escapedTags;
         for(const auto &tag : it->second)
         {
@@ -201,9 +223,18 @@ void TMSUPlugin::editTags()
     FileTagSetMap oldFileTagSetMap;
     TagUsageList tagUsageList = getTagUsage();
 
-    for(const auto &url : urls)
     {
-        oldFileTagSetMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
+        QProgressDialog progress(QStringLiteral("Fetching tags for files..."), "", 0, urls.size());
+        progress.setMinimumDuration(1500);
+        progress.setCancelButton(nullptr);
+        int filesDone = 0;
+        for(const auto &url : urls)
+        {
+            progress.setValue(filesDone++);
+            QApplication::processEvents();
+
+            oldFileTagSetMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
+        }
     }
 
     TagDialog tagDialog(oldFileTagSetMap, tagUsageList);
