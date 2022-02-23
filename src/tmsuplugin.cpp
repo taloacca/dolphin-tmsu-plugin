@@ -15,6 +15,7 @@ K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 // TODO: better error messages from QProcess failures
 // TODO: cancel buttons on QProgressDialogs?
 // TODO: batch tag getting as a stopgap until I can add stdin?
+// TODO: tag value autocomplete.  If nothing else, can give existing tags a count of 1.  Maybe have completer take into account values used per-tag?
 TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const QVariantList &args) :
     KAbstractFileItemActionPlugin(parent)
 {
@@ -187,10 +188,19 @@ void TMSUPlugin::addTagsForFiles(const FileTagSetMap &tagAddMap)
     process.setWorkingDirectory(m_workingDirectory);
     process.start("tmsu", {"tag", "-"});
 
-    // No progress dialog here.  Writing to the process is so fast that almost all of the time is spent waiting for the process to finish, and there isn't any
-    // useful output to derive a progress value from.
+    // Progress dialog is less useful here.  Writing to the process is so fast that almost all of the time is spent waiting for the process to finish, so there
+    // isn't a great way to determine overall progress.
+    QProgressDialog progress(QStringLiteral("Adding tags for files..."), "", 0, 0);
+    progress.setCancelButton(nullptr);
+    if(tagAddMap.size() > 100)
+    {
+        progress.setMinimumDuration(0);
+        progress.setValue(0);
+    }
     for(auto it = tagAddMap.keyValueBegin(); it != tagAddMap.keyValueEnd(); ++it)
     {
+        QApplication::processEvents();
+
         QList< QString > escapedTags;
         for(const auto &tag : it->second)
         {
