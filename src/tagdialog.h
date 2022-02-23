@@ -24,7 +24,7 @@ class TagDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tagUsageList, QWidget* parent = nullptr);
+    explicit TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tagUsageList, const TagUsageList &valueUsageList, QWidget* parent = nullptr);
 
     const FileTagSetMap &getFileTagSetMap() const { return m_fileTagSetMap; }
 
@@ -46,11 +46,14 @@ private:
     QHBoxLayout *m_editLineLayout;
 
     QLineEdit *m_newTagName;
+    QLineEdit *m_newTagValue;
+    QCompleter *m_tagCompleter;
+    QCompleter *m_valueCompleter;
+    TagUsageListModel *m_tagListModel;
+    TagUsageListModel *m_valueListModel;
     QPushButton *m_addButton;
     FlowLayout *m_tagLayout;
     TagValidator *m_validator;
-    QCompleter *m_completer;
-    TagUsageListModel *m_listModel;
     QDialogButtonBox *m_buttonBox;
 };
 #endif // TAGDIALOG_H
