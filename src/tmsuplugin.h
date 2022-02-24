@@ -12,6 +12,7 @@
 #include <QAction>
 #include <QObject>
 #include <QVariant>
+#include <QProcess>
 
 class TMSUPlugin : public KAbstractFileItemActionPlugin
 {
@@ -28,6 +29,7 @@ private:
     void setFileTagSetMap(const FileTagSetMap &oldFileTagSetMap, const FileTagSetMap &newFileTagSetMap);
     void removeTagsForFile(const QString &file, const TMSUTagSet &tagSet);
     void addTagsForFiles(const FileTagSetMap &tagAddMap);
+    bool checkTmsuProcessError(const QProcess &process);
 
 private Q_SLOTS:
     void editTags();

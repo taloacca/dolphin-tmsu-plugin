@@ -3,7 +3,6 @@
 #include "tagusage.h"
 
 #include <QFileInfo>
-#include <QProcess>
 #include <QTextCodec>
 #include <QMessageBox>
 #include <QProgressDialog>
@@ -11,8 +10,6 @@
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
 
-// TODO: better error messages from QProcess failures
-// TODO: cancel buttons on QProgressDialogs?
 // TODO: batch tag getting as a stopgap until I can add stdin?
 // TODO: tag value autocomplete.  If nothing else, can give existing tags a count of 1.  Maybe have completer take into account values used per-tag?
 TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const QVariantList &args) :
@@ -73,10 +70,8 @@ TMSUTagSet TMSUPlugin::getTagsForFile(const QString &file)
             tags.insert(TMSUTag::fromEscapedString(tagName));
         }
     }
-    if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
+    if(checkTmsuProcessError(process))
     {
-        QMessageBox messageBox;
-        messageBox.critical(0, "Error", "Error running TMSU command!");
         return TMSUTagSet();
     }
 
@@ -113,10 +108,8 @@ TagUsageList TMSUPlugin::getTagUsage()
             tagUsage.append(TagUsage(tagName, tagCount));
         }
     }
-    if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
+    if(checkTmsuProcessError(process))
     {
-        QMessageBox messageBox;
-        messageBox.critical(0, "Error", "Error running TMSU command!");
         return TagUsageList();
     }
 
@@ -210,12 +203,25 @@ void TMSUPlugin::addTagsForFiles(const FileTagSetMap &tagAddMap)
     }
     process.closeWriteChannel();
     process.waitForFinished();
-    if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
+    checkTmsuProcessError(process);
+}
+
+bool TMSUPlugin::checkTmsuProcessError(const QProcess &process)
+{
+    if((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
     {
+        QString errorStr;
+        if((process.exitStatus() != QProcess::NormalExit))
+            errorStr = QStringLiteral("Process crashed");
+        else if((process.error() != QProcess::UnknownError))
+            errorStr = process.errorString();
+        else if((process.exitCode() != 0))
+            errorStr = QStringLiteral(" Process returned ") + QString::number(process.exitCode());
         QMessageBox messageBox;
-        messageBox.critical(0, "Error", "Error running TMSU command!");
-        return;
+        messageBox.critical(0, "Error", QStringLiteral("Error running TMSU command: ") + errorStr);
+        return true;
     }
+    return false;
 }
 
 void TMSUPlugin::editTags()
