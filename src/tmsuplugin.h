@@ -26,6 +26,7 @@ public:
 private:
     FileTagSetMap getTagsForFiles(const QStringList &files);
     TagUsageList getTagUsage();
+    QStringList getValueUsage();
     void setFileTagSetMap(const FileTagSetMap &oldFileTagSetMap, const FileTagSetMap &newFileTagSetMap);
     void removeTagsForFile(const QString &file, const TMSUTagSet &tagSet);
     void addTagsForFiles(const FileTagSetMap &tagAddMap);

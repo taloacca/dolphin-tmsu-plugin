@@ -10,7 +10,7 @@
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
 
-// TODO: tag value autocomplete.  If nothing else, can give existing tags a count of 1.  Maybe have completer take into account values used per-tag?
+// TODO: make completers work with empty string
 TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const QVariantList &args) :
     KAbstractFileItemActionPlugin(parent)
 {
@@ -149,6 +149,32 @@ TagUsageList TMSUPlugin::getTagUsage()
     return tagUsage;
 }
 
+QStringList TMSUPlugin::getValueUsage()
+{
+    QStringList valueUsage;
+    QProcess process;
+    process.setWorkingDirectory(m_workingDirectory);
+    process.start("tmsu", {"values", "-1"});
+    while(process.waitForReadyRead())
+    {
+        char buffer[512];
+        while (process.readLine(buffer, sizeof(buffer)) > 0)
+        {
+            QString valueName = QTextCodec::codecForLocale()->toUnicode(buffer);
+            // Remove newline
+            valueName.chop(1);
+
+            valueUsage.append(valueName);
+        }
+    }
+    if(checkTmsuProcessError(process))
+    {
+        return QStringList();
+    }
+
+    return valueUsage;
+}
+
 void TMSUPlugin::setFileTagSetMap(const FileTagSetMap &oldFileTagSetMap, const FileTagSetMap &newFileTagSetMap)
 {
     FileTagSetMap tagRemoveMap;
@@ -271,8 +297,9 @@ void TMSUPlugin::editTags()
         return;
 
     TagUsageList tagUsageList = getTagUsage();
+    QStringList valueUsageList = getValueUsage();
 
-    TagDialog tagDialog(oldFileTagSetMap, tagUsageList);
+    TagDialog tagDialog(oldFileTagSetMap, tagUsageList, valueUsageList);
     if(tagDialog.exec() == QDialog::Accepted)
     {
         FileTagSetMap newFileTagSetMap = tagDialog.getFileTagSetMap();
