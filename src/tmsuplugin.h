@@ -24,7 +24,7 @@ public:
     QList< QAction* > actions(const KFileItemListProperties& fileItemInfos, QWidget* parentWidget) override;
 
 private:
-    TMSUTagSet getTagsForFile(const QString &file);
+    FileTagSetMap getTagsForFiles(const QStringList &files);
     TagUsageList getTagUsage();
     void setFileTagSetMap(const FileTagSetMap &oldFileTagSetMap, const FileTagSetMap &newFileTagSetMap);
     void removeTagsForFile(const QString &file, const TMSUTagSet &tagSet);

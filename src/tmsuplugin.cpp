@@ -10,7 +10,6 @@
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
 
-// TODO: batch tag getting as a stopgap until I can add stdin?
 // TODO: tag value autocomplete.  If nothing else, can give existing tags a count of 1.  Maybe have completer take into account values used per-tag?
 TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const QVariantList &args) :
     KAbstractFileItemActionPlugin(parent)
@@ -53,27 +52,60 @@ QList< QAction* > TMSUPlugin::actions(const KFileItemListProperties& fileItemInf
     return actions;
 }
 
-TMSUTagSet TMSUPlugin::getTagsForFile(const QString &file)
+FileTagSetMap TMSUPlugin::getTagsForFiles(const QStringList &files)
 {
-    TMSUTagSet tags;
+    if(files.isEmpty())
+        return FileTagSetMap();
+
+    FileTagSetMap tags;
 
     QProcess process;
     process.setWorkingDirectory(m_workingDirectory);
-    process.start("tmsu", {"tags", "-1", "--name", "never", file});
+    QStringList argList = {"tags", "-1", "--name", "never"};
+    argList.append(files);
+    process.start("tmsu", argList);
+
+    int filesCount = 0;
+    tags[files[filesCount]] = TMSUTagSet();
+
+    QProgressDialog progress(QStringLiteral("Fetching tags for files..."), "", 0, files.size());
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setMinimumDuration(1500);
+    progress.setCancelButton(nullptr);
+
     while(process.waitForReadyRead())
     {
         char buffer[512];
         while (process.readLine(buffer, sizeof(buffer)) > 0)
         {
             QString tagName = QTextCodec::codecForLocale()->toUnicode(buffer);
+            if(tagName == "\n")
+            {
+                filesCount++;
+                progress.setValue(filesCount);
+                if(filesCount >= files.size())
+                {
+                    QMessageBox messageBox;
+                    messageBox.critical(0, "Error", "Error fetching TMSU tags!");
+                    return FileTagSetMap();
+                }
+                tags[files[filesCount]] = TMSUTagSet();
+                continue;
+            }
             // Remove newline
             tagName.chop(1);
-            tags.insert(TMSUTag::fromEscapedString(tagName));
+            tags[files[filesCount]].insert(TMSUTag::fromEscapedString(tagName));
         }
     }
     if(checkTmsuProcessError(process))
     {
-        return TMSUTagSet();
+        return FileTagSetMap();
+    }
+    if(tags.size() != files.size())
+    {
+        QMessageBox messageBox;
+        messageBox.critical(0, "Error", "Error fetching TMSU tags!");
+        return FileTagSetMap();
     }
 
     return tags;
@@ -228,23 +260,17 @@ bool TMSUPlugin::checkTmsuProcessError(const QProcess &process)
 void TMSUPlugin::editTags()
 {
     const QList< QUrl > urls = sender()->property("urls").value< QList< QUrl > >();
-
-    FileTagSetMap oldFileTagSetMap;
-    TagUsageList tagUsageList = getTagUsage();
-
+    QStringList files;
+    for(const auto &url : urls)
     {
-        QProgressDialog progress(QStringLiteral("Fetching tags for files..."), "", 0, urls.size());
-        progress.setWindowModality(Qt::WindowModal);
-        progress.setMinimumDuration(1500);
-        progress.setCancelButton(nullptr);
-        int filesDone = 0;
-        for(const auto &url : urls)
-        {
-            progress.setValue(filesDone++);
-
-            oldFileTagSetMap[url.toLocalFile()] = getTagsForFile(url.toLocalFile());
-        }
+        files.append(url.toLocalFile());
     }
+
+    FileTagSetMap oldFileTagSetMap = getTagsForFiles(files);
+    if(oldFileTagSetMap.isEmpty())
+        return;
+
+    TagUsageList tagUsageList = getTagUsage();
 
     TagDialog tagDialog(oldFileTagSetMap, tagUsageList);
     if(tagDialog.exec() == QDialog::Accepted)
@@ -259,7 +285,9 @@ void TMSUPlugin::copyTags()
     const QList< QUrl > urls = sender()->property("urls").value< QList< QUrl > >();
     Q_ASSERT(urls.size() == 1);
 
-    m_copiedTags = getTagsForFile(urls[0].toLocalFile());
+    FileTagSetMap fileTagSetMap = getTagsForFiles(QStringList(urls[0].toLocalFile()));
+    if(fileTagSetMap.size() > 0)
+        m_copiedTags = *(fileTagSetMap.begin());
 }
 
 void TMSUPlugin::pasteTags()
