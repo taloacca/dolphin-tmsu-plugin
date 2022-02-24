@@ -25,7 +25,8 @@ QList< QAction* > TMSUPlugin::actions(const KFileItemListProperties& fileItemInf
 
     QList< QAction* > actions;
 
-    QAction* editAction = new QAction(QIcon::fromTheme(QStringLiteral("tag")), QStringLiteral("Edit TMSU Tags"), parentWidget);
+    QString actionText = (fileItemInfos.urlList().size() > 1 ? QStringLiteral("Edit Common TMSU Tags") : QStringLiteral("Edit TMSU Tags"));
+    QAction* editAction = new QAction(QIcon::fromTheme(QStringLiteral("tag")), actionText, parentWidget);
     editAction->setProperty("urls", QVariant::fromValue(fileItemInfos.urlList()));
     editAction->setProperty("parentWidget", QVariant::fromValue(parentWidget));
     connect(editAction, &QAction::triggered, this, &TMSUPlugin::editTags);
