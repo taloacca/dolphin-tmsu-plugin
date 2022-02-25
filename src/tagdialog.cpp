@@ -65,6 +65,7 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     m_scrollArea = new QScrollArea(this);
     m_scrollArea->setWidgetResizable(true);
     m_scrollArea->setWidget(tagLayoutWidget);
+    m_scrollArea->setMinimumHeight(300);
 
     m_tagLayout = new FlowLayout();
     tagLayoutWidget->setLayout(m_tagLayout);
