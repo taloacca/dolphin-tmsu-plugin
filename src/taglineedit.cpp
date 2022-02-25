@@ -21,13 +21,6 @@ void TagLineEdit::forceEmptyCompletion()
     }
 }
 
-void TagLineEdit::focusInEvent(QFocusEvent *e)
-{
-    QLineEdit::focusInEvent(e);
-    // If this delay isn't here, the popup gets drawn at the wrong place initially when TagDialog is created.
-    timer.singleShot(100, this, &TagLineEdit::forceEmptyCompletion);
-}
-
 void TagLineEdit::keyPressEvent(QKeyEvent *e)
 {
     QLineEdit::keyPressEvent(e);

@@ -2,7 +2,6 @@
 #define TAGLINEEDIT_H
 
 #include <QLineEdit>
-#include <QTimer>
 
 class TagLineEdit : public QLineEdit
 {
@@ -16,9 +15,6 @@ private Q_SLOTS:
 
 private:
     void forceEmptyCompletion();
-    void focusInEvent(QFocusEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;
-
-    QTimer timer;
 };
 #endif // TAGLINEEDIT_H
