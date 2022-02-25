@@ -10,7 +10,6 @@
 K_PLUGIN_CLASS_WITH_JSON(TMSUPlugin, "tmsuplugin.json")
 
 
-// TODO: make completers work with empty string
 TMSUPlugin::TMSUPlugin(QObject* parent, const KPluginMetaData &metaData, const QVariantList &args) :
     KAbstractFileItemActionPlugin(parent)
 {

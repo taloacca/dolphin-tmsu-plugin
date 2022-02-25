@@ -9,6 +9,7 @@ target_sources(tmsuplugin PRIVATE
     tagusagelistmodel.cpp
     tagwidget.cpp
     tagvalidator.cpp
+    taglineedit.cpp
     additionaltagswidget.cpp
     flowlayout.cpp
 )

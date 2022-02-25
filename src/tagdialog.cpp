@@ -39,7 +39,7 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     m_editLineLayout = new QHBoxLayout();
     m_mainLayout->addLayout(m_editLineLayout);
 
-    m_newTagName = new QLineEdit(this);
+    m_newTagName = new TagLineEdit(this);
     m_newTagName->setPlaceholderText(QStringLiteral("Tag Name"));
     m_newTagName->setMinimumWidth(200);
     m_newTagName->setClearButtonEnabled(true);
@@ -47,7 +47,7 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     m_newTagName->setValidator(m_validator);
     m_editLineLayout->addWidget(m_newTagName);
 
-    m_newTagValue = new QLineEdit(this);
+    m_newTagValue = new TagLineEdit(this);
     m_newTagValue->setPlaceholderText(QStringLiteral("Tag Value (Optional)"));
     m_newTagValue->setMinimumWidth(200);
     m_newTagValue->setClearButtonEnabled(true);

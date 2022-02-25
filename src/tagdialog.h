@@ -3,6 +3,7 @@
 
 #include "tmsutag.h"
 #include "tagusage.h"
+#include "taglineedit.h"
 #include "tagvalidator.h"
 #include "tagusagelistmodel.h"
 #include "additionaltagswidget.h"
@@ -45,8 +46,8 @@ private:
     QVBoxLayout *m_mainLayout;
     QHBoxLayout *m_editLineLayout;
 
-    QLineEdit *m_newTagName;
-    QLineEdit *m_newTagValue;
+    TagLineEdit *m_newTagName;
+    TagLineEdit *m_newTagValue;
     QCompleter *m_tagCompleter;
     QCompleter *m_valueCompleter;
     TagUsageListModel *m_tagListModel;
