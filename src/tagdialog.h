@@ -17,6 +17,7 @@
 #include <QMap>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QScrollArea>
 
 typedef QMap< QString, TMSUTagSet > FileTagSetMap;
 
@@ -52,6 +53,7 @@ private:
     QCompleter *m_valueCompleter;
     TagUsageListModel *m_tagListModel;
     QPushButton *m_addButton;
+    QScrollArea *m_scrollArea;
     FlowLayout *m_tagLayout;
     TagValidator *m_validator;
     QDialogButtonBox *m_buttonBox;
