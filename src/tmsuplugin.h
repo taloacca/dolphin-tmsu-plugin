@@ -28,7 +28,7 @@ private:
     TagUsageList getTagUsage();
     QStringList getValueUsage();
     void setFileTagSetMap(const FileTagSetMap &oldFileTagSetMap, const FileTagSetMap &newFileTagSetMap);
-    void removeTagsForFile(const QString &file, const TMSUTagSet &tagSet);
+    void removeTagsForFiles(const FileTagSetMap &tagRemoveMap);
     void addTagsForFiles(const FileTagSetMap &tagAddMap);
     bool checkTmsuProcessError(const QProcess &process);
 

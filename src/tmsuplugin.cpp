@@ -191,45 +191,46 @@ void TMSUPlugin::setFileTagSetMap(const FileTagSetMap &oldFileTagSetMap, const F
             tagAddMap[it->first] = tagsToAdd;
     }
 
-    {
-        QProgressDialog progress(QStringLiteral("Removing tags for files..."), "", 0, tagRemoveMap.size());
-        progress.setWindowModality(Qt::WindowModal);
-        progress.setMinimumDuration(1500);
-        progress.setCancelButton(nullptr);
-        int filesDone = 0;
-        for(auto it = tagRemoveMap.keyValueBegin(); it != tagRemoveMap.keyValueEnd(); ++it)
-        {
-            progress.setValue(filesDone++);
-
-            if(!it->second.isEmpty())
-                removeTagsForFile(it->first, it->second);
-        }
-    }
+    if(!tagRemoveMap.isEmpty())
+        removeTagsForFiles(tagRemoveMap);
 
     if(!tagAddMap.isEmpty())
         addTagsForFiles(tagAddMap);
 }
 
-void TMSUPlugin::removeTagsForFile(const QString &file, const TMSUTagSet &tags)
+void TMSUPlugin::removeTagsForFiles(const FileTagSetMap &tagRemoveMap)
 {
-    QList< QString > escapedTags;
-    for(const auto &tag : tags)
+    // TMSU doesn't have a stdin option for 'untag', so instead just group the removes by tag, since it's faster than calling an untag per-file in most cases
+    QMap< QString, QSet< QString > > tagToFileSetMap;
+    for(auto it = tagRemoveMap.keyValueBegin(); it != tagRemoveMap.keyValueEnd(); ++it)
     {
-        escapedTags.append(tag.toEscapedString());
+        for(const auto &tag : it->second)
+        {
+            tagToFileSetMap[tag.toEscapedString()].insert(it->first);
+        }
     }
 
-    QString tagString = escapedTags.join(" ");
+    QProgressDialog progress(QStringLiteral("Removing tags..."), "", 0, tagToFileSetMap.size());
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setMinimumDuration(1500);
+    progress.setCancelButton(nullptr);
+    int tagsDone = 0;
 
-    QProcess process;
-    process.setWorkingDirectory(m_workingDirectory);
-    process.start("tmsu", {"untag", file, "--tags", tagString});
-    if ((process.exitStatus() != QProcess::NormalExit) || (process.error() != QProcess::UnknownError) || (process.exitCode() != 0))
+    for(auto it = tagToFileSetMap.keyValueBegin(); it != tagToFileSetMap.keyValueEnd(); ++it)
     {
-        QMessageBox messageBox;
-        messageBox.critical(0, "Error", "Error running TMSU command!");
-        return;
+        progress.setValue(tagsDone++);
+        QProcess process;
+        process.setWorkingDirectory(m_workingDirectory);
+        QStringList argList = {"untag", "--tags", it->first};
+        argList.append(it->second.values());
+
+        process.start("tmsu", argList);
+        process.waitForFinished();
+        if(checkTmsuProcessError(process))
+        {
+            break;
+        }
     }
-    process.waitForFinished();
 }
 
 void TMSUPlugin::addTagsForFiles(const FileTagSetMap &tagAddMap)
