@@ -15,6 +15,6 @@ private Q_SLOTS:
 
 private:
     void forceEmptyCompletion();
-    void keyPressEvent(QKeyEvent *e) override;
+    void keyPressEvent(QKeyEvent *event) override;
 };
 #endif // TAGLINEEDIT_H
