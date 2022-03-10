@@ -28,11 +28,13 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     m_tagCompleter->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     m_tagCompleter->setCompletionMode(QCompleter::PopupCompletion);
     m_tagCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    connect(m_tagCompleter, QOverload<const QString &>::of(&QCompleter::activated), this, &TagDialog::confirmTag, Qt::QueuedConnection);
 
     m_valueCompleter = new QCompleter(valueUsageList, this);
     m_valueCompleter->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     m_valueCompleter->setCompletionMode(QCompleter::PopupCompletion);
     m_valueCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    connect(m_valueCompleter, QOverload<const QString &>::of(&QCompleter::activated), this, &TagDialog::confirmTag, Qt::QueuedConnection);
 
     m_validator = new TagValidator(this);
 
