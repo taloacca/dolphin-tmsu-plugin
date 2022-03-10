@@ -24,6 +24,7 @@ public:
 
     static bool tmsuTagComparator(const TMSUTag &t1, const TMSUTag &t2);
     bool operator==(const TMSUTag &other) const;
+    bool operator>(const TMSUTag &other) const;
 
 private:
     QString m_name;

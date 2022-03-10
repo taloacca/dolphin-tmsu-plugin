@@ -76,6 +76,13 @@ bool TMSUTag::operator==(const TMSUTag &other) const
            getValue() == other.getValue();
 }
 
+bool TMSUTag::operator>(const TMSUTag &other) const
+{
+    if(getName() != other.getName())
+        return getName() > other.getName();
+    return getValue() > other.getValue();
+}
+
 uint qHash(const TMSUTag &c, uint seed) noexcept
 {
     seed = qHash(c.getName(), seed);

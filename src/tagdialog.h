@@ -7,7 +7,7 @@
 #include "tagvalidator.h"
 #include "tagusagelistmodel.h"
 #include "additionaltagswidget.h"
-#include "flowlayout.h"
+#include "tagflowlayout.h"
 
 #include <QDialog>
 #include <QVBoxLayout>
@@ -54,7 +54,7 @@ private:
     TagUsageListModel *m_tagListModel;
     QPushButton *m_addButton;
     QScrollArea *m_scrollArea;
-    FlowLayout *m_tagLayout;
+    TagFlowLayout *m_tagLayout;
     TagValidator *m_validator;
     QDialogButtonBox *m_buttonBox;
 };

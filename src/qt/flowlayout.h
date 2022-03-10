@@ -4,7 +4,7 @@
 #include <QLayout>
 #include <QStyle>
 
-class FlowLayout final : public QLayout
+class FlowLayout : public QLayout
 {
 public:
     explicit FlowLayout(QWidget *parent, int margin = -1, int hSpacing = -1, int vSpacing = -1);
@@ -24,7 +24,7 @@ public:
     QSize sizeHint() const override;
     QLayoutItem *takeAt(int index) override;
 
-private:
+protected:
     int doLayout(const QRect &rect, bool testOnly) const;
     int smartSpacing(QStyle::PixelMetric pm) const;
 

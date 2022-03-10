@@ -11,7 +11,8 @@ target_sources(tmsuplugin PRIVATE
     tagvalidator.cpp
     taglineedit.cpp
     additionaltagswidget.cpp
-    flowlayout.cpp
+    tagflowlayout.cpp
+    qt/flowlayout.cpp
 )
 
 target_link_libraries(tmsuplugin

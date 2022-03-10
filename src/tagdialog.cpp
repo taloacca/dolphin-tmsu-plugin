@@ -69,7 +69,7 @@ TagDialog::TagDialog(const FileTagSetMap &fileTagSetMap, const TagUsageList &tag
     m_scrollArea->setWidget(tagLayoutWidget);
     m_scrollArea->setMinimumHeight(300);
 
-    m_tagLayout = new FlowLayout();
+    m_tagLayout = new TagFlowLayout();
     tagLayoutWidget->setLayout(m_tagLayout);
     m_mainLayout->addWidget(m_scrollArea);
 
